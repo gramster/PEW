@@ -1,0 +1,3 @@
++v -mL -ie:\pew\include\ -ic:\include\ -ic:\lint\ -dINTEGRATE -dDEMO -d__LARGE__ sl-tc pew ed pewmenus pew_ec compiler stmt&exp pasparse estparse elink pew_run interp browse analyze
+
+

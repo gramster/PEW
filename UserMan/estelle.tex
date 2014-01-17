@@ -1,0 +1,1048 @@
+\subsection[Introduction]{Introduction}
+ 
+Estelle is a {\em formal description technique} (FDT) based on
+an extended state transition model (Estelle is a loose
+acronym for {\em Extended State Transition Language}). It is
+being developed as an International Standards Organisation
+standard by ISO/TC 97/SC 21, the subcommittee for
+Information Retrieval, Transfer and Management for the Open
+Systems Interconnection (OSI).
+ 
+Estelle can be used to describe distributed, concurrent
+information processing systems. It is aimed in particular
+at describing the service definitions and protocol
+specifications of OSI layers. In the OSI model, each layer
+is separated from the layers above and below, and
+communicates with these via service requests. Apart from
+this communication, the various layers can be regarded as
+separate asynchronous systems. Furthermore, the peer layers
+on separate systems behave relatively asynchronously with
+respect to one another. A further characteristic of such
+systems is nondeterminism. Through a hierarchical structure
+of processes, Estelle provides facilities for both
+asynchronous parallel execution and nondeterministic
+sequential execution.
+ 
+Essentially, Estelle is a subset of the programming
+language Pascal (ISO 7185) with extensions for concurrency
+based on an extended finite-state model. An Estelle program
+(called a {\bf specification}) specifies a number of processes
+which may execute either sequentially or concurrently, or a
+combination of both. Each process is an extended finite-
+state automaton, consisting of a number of {\em states}, a set of
+possible {\em state transitions}, the {\em conditions} which must be
+satisfied for the transitions to be {\em enabled}, and the 
+{\em actions} associated with each transition. The automata communicate
+with one another using {\em message passing} on FIFO queues. Each
+automaton typically represents a layer or part thereof of a
+protocol executing on some specific machine. A 3-layer
+protocol executing on two separate machines would thus
+typically be represented in Estelle using 3*2=6 automata.
+The entire system is dynamic and nondeterministic; new
+processes or automata may be freely created and destroyed
+during the execution of a specification.
+ 
+ This informal introduction to the syntax
+and semantics of Estelle assumes the reader is familiar
+with the Pascal language; only the changes and extensions to
+Pascal are considered.
+
+\subsection[Conventions and Outline]{Conventions and Outline}
+\label{conventions}
+ 
+ Several conventions have been used throughout this
+document. Within syntactic grammar rules, bold type has
+been used to represent terminals, italic type for
+nonterminals, and normal type for the grammar metalanguage.
+The metalanguage consists of the symbols:
+
+\begin{tabbing}
+mmmmmm\=mmmmmmm\=\+\kill
+=\>Separates right and left hand sides of productions\\
+$|$\>Separates alternatives\\
+$[]$\>Indicates optional elements\\
+\{\}\>Indicates zero or more elements\\
++\{\}\>Indicates one or more elements\\
+()\>Used for grouping purposes\\
+$<>$\>Used to identify nonterminals\\
+\dots\>Used to abbreviate a scalar range\\
+\end{tabbing}
+
+Unconventionally, productions are not terminated with a
+period as this may cause confusion with punctuation symbols
+that are intended as language terminals.
+ 
+Within the productions, upper case nonterminals represent
+Pascal constructs. In general, these productions are not
+explicitly given, but should be fairly obvious to the reader
+who is familiar with Pascal. Lower case nonterminals are
+used exclusively for Estelle constructs.
+ 
+Within the text, important terms have been indicated in
+italic, while grammar terminals are once again indicated in
+bold.
+ 
+To clarify the purpose of identifiers, they are often
+prefixed with an abbreviation to indicate their use. For
+example, {\em role-IDENT} is an identifier whose purpose it is to
+identify a role. These prefixes are included for semantic
+clarification only; all identifiers ultimately have the same
+production rule.
+
+The various parts of a programming language are usually
+strongly interconnected; it is difficult to discuss any one
+aspect of the language in isolation from others. The
+breakdown used here is necessarily artificial.
+In an attempt to reduce forward references different parts
+of the language will be introduced as they are used;
+however, the detailed discussion of any particular part will
+be confined to the relevant section.
+ 
+The first section is a brief overview of the additions to
+ISO Pascal. None of the additions are discussed in detail;
+they are dealt with individually in the remaining sections.
+Section \ref{restrict} considers the restrictions to ISO Pascal that
+have been introduced.
+ 
+Section \ref{terminology} introduces some important terminology, while
+Section \ref{automata} is a discussion of how finite-state automata may
+be realised using Estelle. It concentrates primarily on the
+external behaviour of the automata, regarding each automaton
+as a process in a multiprocess system. Section \ref{states}
+discusses the internals of the automata, namely, the
+specification of states and state transitions, and how these
+are interpreted during execution. Section \ref{IPC} concentrates
+on the communication between automata, that is, the message
+passing and shared variable facilities of Estelle.
+ 
+As each new aspect of the language is covered, the
+syntactic production rules for that aspect are given, and
+the semantics discussed. A collected syntax is included in
+the appendix. Section \ref{conventions} describes the metalanguage used to
+specify the syntactic productions, as well as other
+conventions used.
+
+\subsection[Additions to ISO Pascal]{Additions to ISO Pascal}
+
+The main additions to standard Pascal are the provision
+for concurrent systems and the provision for specifying
+finite-state automata. Other additions include:
+
+\begin{itemize}
+\item identifier names may have underscores in any position;
+this is the only difference from standard Pascal
+identifiers. The general production rule for identifiers
+is thus:
+
+\begin{tabbing}
+mmm\=mmmmmmm\=mm\=\+\kill
+$<$IDENT$>$\>=\>$<$letter$>$ \{ $<$letter$>|<$digit$>$ \}\\
+$<$letter$>$\>=\> a $|$ b $|$ c $|$\dots$|$ z $|$ A $|$ B $|$ C $|$\dots$|$ Z $|$ \_\\
+$<$digit$>$\>=\>0 $|$ 1 $|$ 2 $|$\dots$|$ 9
+\end{tabbing}
+
+\item partial specifications are possible, allowing early
+syntactic checking, separate compilation or the 
+specification of protocols without specifying irrelevant details.
+This is achieved by allowing constants to be declared with the 
+value {\bf any} and variables to be declared with the type 
+\dots. In addition to functions and procedures being able to be
+forward-declared by qualifying them with the keyword {\bf forward},
+the {\bf primitive} and {\bf external} keywords can be similarly
+used to declare functions or procedures that are not defined 
+within the particular file containing these definitions. An {\bf
+external} routine must be declared within another file which is part
+of the specification; a {\bf primitive} routine is one which is
+provided by the language implementor (typically a library
+function/procedure). 
+
+This facility allows incomplete specifications to
+be compiled and thus checked for syntactic errors,
+access to external libraries of functions, as well as
+the ability to omit irrelevant parts of the protocol
+specification (for example, the type of a protocol
+data unit is not needed to define the protocol
+itself).
+
+\item the {\bf all} repetitive statement has been added to the
+existing {\bf repeat}, {\bf while} and {\bf for} statements.
+
+\item the structured statement {\bf forone} has been added
+
+\item the expression factor {\bf exist} has been added
+
+\item the simple statements {\bf attach}, {\bf detach}, 
+{\bf connect}, {\bf disconnect}, {\bf output}, {\bf init},
+{\bf release} and {\bf terminate} have been added.
+\end{itemize}
+
+The {\bf init}, {\bf release}, {\bf terminate}, {\bf all} and
+{\bf forone} statements and {\bf exist} expression are discussed 
+in Section \ref{automata}; the {\bf attach}, {\bf detach},
+{\bf connect}, {\bf disconnect}, and {\bf output} statements
+are discussed in Section \ref{IPC}.
+
+\subsection[Restrictions to ISO Pascal]{Restrictions to ISO
+Pascal}
+\label{restrict}
+
+The fact that Estelle supports concurrency has
+repercussions within the Pascal subset, primarily to allow
+functions and procedures to be reentrant. Several
+restrictions to procedures and functions have thus been
+introduced. They may not reference non-Pascal objects,
+although the Estelle statements {\bf all}, {\bf forone} and {\bf
+exist} may
+still be used on the usual Pascal ordinal types. Functions
+must all be pure; that is, side-effects are prohibited.
+This is enforced through several restrictions: parameters
+may be passed by value only and may not contain any
+pointers, references to global variables are prohibited and
+so are calls to any other non-pure routines. Procedures
+need not be pure; if they are, they may be declared as {\bf pure
+procedure}, and may then be called from functions and other
+pure procedures.
+ 
+All file operations have been removed, including the file
+type and predefined {\bf text} type. Thus the execution of an
+Estelle specification is only meaningful in a controlled
+environment, or if the implementor adds his or her own
+{\bf primitive} library routines for input/output.
+ 
+Labels and {\bf goto}s are also restricted - they may only
+occur within procedures and functions, and labels may only
+be associated with the end of the containing procedure or
+function; in other words, a {\bf goto} acts similar to a {\bf
+return} statement in a language such as 'C'.
+
+\subsection[Terminology]{Terminology}
+\label{terminology}
+
+Several terms are used within Estelle to describe
+processes and interprocess communication. Although these
+terms are discussed within the relevant sections, it is
+appropriate to introduce some here.
+ 
+A {\em channel} is a bidirectional FIFO queue used for
+interprocess communication. Each channel is identified by a
+{\em channel identifier}. The traffic over a channel (which
+consists of messages called {\em interactions}) can be different
+for each of the two directions; each direction is associated
+with a {\em channel role} which specifies what interactions may be
+sent in that direction. The endpoints of a channel are
+called {\em interaction points}.
+ 
+An executing protocol {\em specification} in Estelle consists
+of one or more {\em modules} in a hierachical structure. These
+modules may have different {\em classes}: {\em activities} allow
+nondeterministic sequential execution (ie, if the scheduler
+must choose between a number of enabled activities, it will
+choose only one, and the choice is nondeterministic), while
+{\em processes} allow asynchronous parallel execution (ie, the
+scheduler will execute all of the enabled processes). This
+description is an oversimplification of what actually
+occurs, but is sufficient for now.
+ 
+Each module comprises two parts: the {\em module header}
+specifies the external visibility of the module, while the
+{\em module body} specifies its internal behaviour.
+ 
+The conditions associated with transitions are called
+{\em clauses}, and may be of several different types.
+
+\subsection[Automata]{Automata}
+\label{automata}
+
+In this section, we will consider automata as processes
+in a multiprocessing system. We are thus primarily
+concerned with the creation and destruction of automata, not
+with their internal behaviour or intercommunication, which
+are discussed in sections \ref{states} and \ref{IPC} respectively.
+ 
+At the top level, an Estelle program is a
+$<${\em specification}$>$, identified by a name $<${\em spec-IDENT}$>$ and a
+class $<${\em system-class}$>$, with an internal structure described
+by a $<${\em body-defn}$>$. Queues for interprocess communication may
+be {\em individual} or {\em shared}; usually such {\em queue
+disciplines} will
+be explicitly declared within queue declarations, although a
+global default can be specified with the optional
+$<${\em defaults}$>$. This default must be provided if there are any
+queues declared without explicit queue disciplines.
+ 
+Timescales are semantically meaningless and are simply
+used to express the intentions of the implementor. Time in
+the Estelle model need only be treated consistently; the
+actual units are irrelevant (except in real
+implementations), and serve only to express the intentions
+of the implementor.
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=\+\kill
+$<${\em specification}$>$\>=
+\>{\bf specification} $<${\em spec-IDENT}$>$ [$<${\em system-class}$>$]{\bf
+;}\\
+\>\>[ $<${\em defaults}$>$ ]\\
+\>\>[ $<${\em time-options}$>$ ]\\
+\>\>$<${\em body-defn}$>$\\
+\>\>{\bf end .}\\
+\mbox{}\\
+$<${\em system-class}$>$\>=\>{\bf systemprocess} $|$ {\bf systemactivity}\\
+\mbox{}\\
+$<${\em defaults}$>$\>=\>{\bf default} $<${\em q-discipline}$>$ {\bf ;}\\
+\mbox{}\\
+$<${\em q-discipline}$>$\>=\>{\bf common queue} $|$ {\bf individual queue}\\
+\mbox{}\\
+$<${\em time-options}$>$\>=\>{\bf timescale} $<${\em ts-IDENT}$>$ {\bf ;}\\
+\mbox{}\\
+$<${\em ts-IDENT}$>$\>=\>{\bf hours} $|$ {\bf minutes} $|$ {\bf seconds} $|$\\
+\>\>{\bf milliseconds} $|$ {\bf microseconds}\\
+\mbox{}\\
+$<${\em body-defn}$>$\>=\>$<${\em decl-part}$>$\\
+\>\>$<${\em init-part}$>$\\
+\>\>$<${\em trans-decls}$>$\\
+\end{tabbing}
+
+The $<${\em body-defn}$>$ of a specification consists of three
+parts: the {\em declarations}, an {\em initialisation part}, and a
+{\em transition declaration part}. The initialisation and
+transition declaration parts both specify groups of
+transitions (see section \ref{states} for details). Initially it is
+assumed that the specification exists in an initial state
+that results from executing a transition from its $<${\em init-
+part}$>$ if this is non-empty; otherwise it is in a {\em pre-initial
+state}.
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=\+\kill
+$<${\em decl-part}$>$\>=\>{ $<${\em decls}$>$ }\\
+\mbox{}\\
+$<${\em decls}$>$\>=\>$<${\em CONSTANT-DEFN-PART}$>$\\
+\>\>$|<${\em TYPE-DEFN-PART}$>$\\
+\>\>$|<${\em channel-defn}$>$\\
+\>\>$|<${\em module-header-defn}$>$\\
+\>\>$|<${\em module-body-defn}$>$\\
+\>\>$|<${\em ip-decls}$>$\\
+\>\>$|<${\em mod-var-decls}$>$\\
+\>\>$|<${\em VARIABLE-DECL-PART}$>$\\
+\>\>$|<${\em state-defns}$>$\\
+\>\>$|<${\em state-set-defns}$>$\\
+\>\>$|<${\em PROCEDURE-AND-FUNCTION-DECL-PART}$>$\\
+\mbox{}\\
+$<${\em init-part}$>$\>=\>\{ {\bf initialise} $<${\em trans-group}$>$ \}\\
+\mbox{}\\
+$<${\em trans-decls}$>$\>=\>\{ $<${\em trans-decl}$>$ \}\\
+\mbox{}\\
+$<${\em trans-decl}$>$\>=\>{\bf trans} $<${\em trans-group}$>$\\
+\mbox{}\\
+$<${\em trans-group}$>$\>=\>+\{ $<${\em clause-group}$><${\em trans-block}$>$
+{\bf ;} \}\\
+\end{tabbing}
+
+The declarations may be in any order, and, with the
+exception of the $<${\em state-defn-part}$>$, any declaration or
+definition part may occur more than once. Apart from the
+usual Pascal objects, the declarations may contain {\em channels}
+(bidirectional FIFO message queues) and {\em interaction points}
+(queue endpoints), module {\em headers}, {\em bodies} and {\em
+variables}, and {\em states} and {\em state sets}.
+
+An executing Estelle specification consists of
+a tree of {\em instances} of generic {\em modules}. The
+process structure may be dynamic; processes may at any time
+instantiate others with {\bf init} statements and kill children
+processes with the {\bf release} or {\bf terminate} statements. These
+are discussed later in this section.
+
+An Estelle module is described by its external visibility
+(which is defined by the $<${\em modheader-defn}$>$) and internal 
+behaviour (which is defined by the $<${\em modbody-defn}$>$).
+These two components are separate, and thus modules with the
+same external visibility may exhibit different internal
+behaviour. Modules are bound to headers at compile time and bodies at
+instantiation time.
+
+\begin{tabbing}
+mm\=mmmmmmmmmm\=mm\=\+\kill
+$<${\em modheader-defn}$>$\>=
+\>{\bf module} $<${\em modhdr-IDENT}$>$ [ $<${\em class}$>$ ]\\
+\>\>[ {\bf (} $<${\em param-list}$>$ {\bf )} ] {\bf ;}\\
+\>\>[ {\bf ip} +\{ $<${\em ip-decl}$>$ {\bf ;} \} ]\\
+\>\>[ {\bf export} +\{ $<${\em VARIABLE-DECL}$>$ {\bf ;} \} ]\\
+\>\>{\bf end ;}\\
+\mbox{}\\
+$<${\em class}$>$\>=\>{\bf systemprocess} $|$ {\bf systemactivity}\\
+\>\>$|$ {\bf process} $|$ {\bf activity}\\
+\mbox{}\\
+$<${\em param-list}$>$\>=\>$<${\em VALUE-PARAM-SPECIFICATION}$>$\\
+\>\>\{ {\bf ;} $<${\em VALUE-PARAM-SPECIFICATION}$>$ \}
+\end{tabbing}
+
+The only external access to a module instance is via its
+interaction points and {\em exported variables} which are shared
+with the instance's parent only. These exported variables
+are declared in the $<${\em modheader-defn}$>$. The module header
+also defines parameters which are passed (by value only) to
+an instance of the module when the instance is created. The
+interaction points declared in the module header are
+{\em external interaction points}; in other words, they may be
+accessed by the module's parent.
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=\+\kill
+$<${\em modbody-defn}$>$=\>\>{\bf body} $<${\em modbod-IDENT}$>$ {\bf for} $<${\em
+modhdr-IDENT}$>$ {\bf ;}\\
+\>\>( $<${\em body-defn}$>$ {\bf end ;}\\
+\>\>$|$ {\bf external ;} )
+\end{tabbing}
+
+Notice that two identifiers are used to identify the
+module body; the first is associated with the module body
+itself, and the second specifies which module header is
+being referenced. If the body definition contains the
+keyword {\bf external}, then the actual body definition is in some
+other specification.
+
+The relative behaviour of module instances in the
+hierarchy is determined by the nesting of their definitions
+as well as the class qualifiers {\bf systemprocess},
+{\bf systemactivity}, {\bf process} and {\bf activity}. Processes allow for
+synchronous parallel execution, while activities allow
+nondeterministic sequential execution. A process may be
+created and released only by its parent. A module with a
+class qualifier is called {\em attributed}; the only non-
+attributed modules are inactive modules, which as their name
+suggests consist only of initialisation parts. Inactive
+modules may only parent system modules, which may in turn
+parent only process or activity modules. (System)process
+modules may contain either process or activity children,
+while (system)activity modules may contain only other
+activity modules.
+
+A consequence of the above is that any initial state of a
+specification defines a fixed number of system instances and
+interaction point links above them; this structure once
+initialised cannot change since the parent modules of the
+systems are all inactive and hence cannot create any new
+processes after initialisation. Furthermore, as their
+parents are inactive and hence have no execution priority
+over the systems, the systems behave fully asynchronously
+with respect to one another.
+
+Instances of modules are identified by {\em module variables}.
+References to exported variables and interaction points must
+be qualified by the name of the appropriate module variable.
+Arrays of module variables are allowed.
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em mod-var-decls}$>$=\>\>{\bf modvar} +\{ $<${\em mod-var-decl}$>$ {\bf
+;} \}\\
+\mbox{}\\
+$<${\em mod-var-decl}$>$\>=\>$<${\em IDENT-LIST}$>$ {\bf :} $<${\em
+modhdr-IDENT}$>$\\
+\>\>$|<${\em IDENT-LIST}$>$ {\bf : array [} $<${\em index-type-list}$>$ {\bf
+]}\\
+\>\>\>{\bf of} $<${\em modhdr-IDENT}$>$\\
+\end{tabbing}
+
+The initial value of a module variable is undefined; an
+{\bf init} statement will initialise the variable, and a {\bf
+release} or {\bf terminate} statement causes it to once 
+again become undefined.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmm\=mm\=mmm\=\+\kill
+$<${\em init-stmnt}$>$\>=\>{\bf init} $<${\em module-var}$>$ {\bf with} $<${\em
+modbod-ident}$>$\\
+\>\>\>[ {\bf (} $<${\em EXPR-LIST}$>$ {\bf )} ]\\
+\mbox{}\\
+$<${\em release-stmnt}$>$\>=\>{\bf release} $<${\em module-var}$>$\\
+\mbox{}\\
+$<${\em terminate-stmnt}$>$\>=\>{\bf terminate} $<${\em module-var}$>$
+\end{tabbing}
+
+The execution of the {\bf init} statement causes a new instance
+of the specified module body (and thus header) to be
+created, its parameters to be initialised with the
+expression values, and an initialisation transition from the
+module body (if one exists and is enabled) to be executed.
+After execution of the {\bf init} statement, the module variable
+identifies the module instance.
+ 
+The {\bf release} statement allows a module to release children
+module instances. All external interaction points of the
+module instance are detached or disconnected, and the module
+instance and {\em all its descendants} are released and are no
+longer available. The {\bf terminate} statement is a similar
+statement, except that it uses a form of detach known as
+{\em simple detach}. This will be described later.
+ 
+The {\bf all} statement is a repetitive statement which allows
+iteration over a normal ordinal type or over a set of module
+instances.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmm\=mm\=mmm\=\+\kill
+$<${\em all-stmnt}$>$\>=\>{\bf all} ($<${\em domain-list}$>|<${\em
+module-domain}$>$)\\
+\>\>\>{\bf do} $<${\em STATEMENT}$>$\\
+\mbox{}\\
+$<${\em domain-list}$>$\>=\>$<${\em IDENT-LIST}$>$ {\bf :} $<${\em
+ORDINAL-TYPE}$>$\\
+\>\>\>\{ {\bf ;} $<${\em IDENT-LIST}$>$ {\bf :} $<${\em ORDINAL-TYPE}$>$
+\}\\
+\mbox{}\\
+$<${\em module-domain}$>$\>=\>$<${\em IDENT}$>$ {\bf :} $<${\em modhdr-IDENT}$>$
+\end{tabbing}
+
+The result of an {\bf all} statement is the execution of the
+$<${\em STATEMENT}$>$ for either:
+
+\begin{itemize}
+\item all vectors of values of ordinal type(s) given in the
+ $<${\em domain-list}$>$; or
+
+\item all children module instances whose header definitions are
+ identified by the $<${\em modhdr-IDENT}$>$ in the $<${\em module-
+ domain}$>$.
+\end{itemize}
+
+The order of execution is arbitrary. If the domain is
+empty, the statement is not executed. The bounds of a
+domain are evaluated once and are not affected by execution
+of the statement.
+ 
+A similar statement is the {\bf forone} statement:
+
+\begin{tabbing}
+mm\=mmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em forone-stmnt}$>$\>=\>
+{\bf forone} ($<${\em domain-list}$>|<${\em module-domain}$>$)\\
+\>\>\>{\bf suchthat} $<${\em BOOLEAN-EXPR}$>$\\
+\>\>\>{\bf do} $<${\em STATEMENT}$>$\\
+\>\>\>[ {\bf otherwise} $<${\em STATEMENT}$>$ ]
+\end{tabbing}
+
+This is much like the {\bf all} statement, except that only one
+of the possible (vector of) values is used, and this must
+satisfy the Boolean expression.
+ 
+To assist in these statements, the {\bf exist} Boolean
+expression may be used:
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em exist-one}$>$\>=\>{\bf exist} ($<${\em domain-list}$>|<${\em
+module-domain}$>$)\\
+\>\>\>{\bf suchthat} $<${\em FACTOR}$>$\\
+\end{tabbing}
+
+The semantics are obvious in the light of the {\bf forone}
+statement: if an element of the domain exists that satisfies
+the $<${\em FACTOR}$>$, then the expression returns TRUE, otherwise it
+returns FALSE.
+
+\subsection[States and State Transitions]{States and State
+Transitions}
+\label{states}
+
+We now consider the details of how Estelle allows state
+transitions to be specified.
+ 
+Each instance of a module is a nondeterministic state
+transition system, characterised by a set of states, subset
+of initial states, and next-state relation. The initial
+states are defined by the module $<${\em init-part}$>$, which
+describes the initial state, variable initialisation, and
+the initial hierarchy and interconnection structure of
+descendant module instances, if any. The one-to-many next-state
+relation is specified by transitions, each composed of
+a $<${\em clause-group}$>$ determining the pre- and post- states and
+any conditions which must be fulfilled for the transition to
+be {\em enabled}, and a $<${\em trans-block}$>$ defining the actions to be
+executed upon firing the transition. If the transition
+block is empty, the module is {\em inactive} and serves only as a
+parent to other modules.
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em init-part}$>$\>=\>\{ {\bf initialise} $<${\em trans-group}$>$ \}\\
+\mbox{}\\
+$<${\em trans-group}$>$\>=\>+\{ $<${\em clause-group}$><${\em trans-block}$>$
+{\bf ;} \}\\
+\end{tabbing}
+
+All possible values of the control state of the EFSM must
+be enumerated in a state definition part:
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em state-defns}$>$\>=\>{\bf state} $<${\em IDENT-LIST}$>$ {\bf ;}
+\end{tabbing}
+
+States may be grouped together into state sets; this is
+simply a compact notation allowing a single {\em state set
+identifier} to reference a list of elements.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em state-set-defns}$>$\>=\>{\bf stateset} +\{ $<${\em state-set-defn}$>$ {\bf ;}
+\}\\
+\mbox{}\\
+$<${\em state-set-defn}$>$\>=\>
+$<${\em state-set-IDENT}$>$ {\bf =} $<${\em state-set-constant}$>$\\
+\mbox{}\\
+$<${\em state-set-constant}$>$\>=\>[ $<${\em state-IDENT}$>$ \{ {\bf ,}
+ $<${\em state-IDENT}$>$ \} ]\\
+\end{tabbing}
+
+Transitions consist of $<${\em clause-group}$>$s and 
+$<${\em trans-block}$>$s:
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em trans-decl-part}$>$\>=\>\{ $<${\em trans-decl}$>$ \}\\
+\mbox{}\\
+$<${\em trans-decl}$>$\>=\>{\bf trans} $<${\em trans-group}$>$\\
+\mbox{}\\
+$<${\em trans-group}$>$\>=\>+\{ $<${\em clause-group}$><${\em trans-block}$>$ {\bf ;}
+\}\\
+\mbox{}\\
+$<${\em clause-group}$>$\>=\>[ $<${\em provided-clause}$>$ ]\\
+\>\>[ $<${\em from-clause}$>$ ]\\
+\>\>[ $<${\em to-clause}$>$ ]\\
+\>\>[ $<${\em any-clause}$>$ ]\\
+\>\>[ $<${\em delay-clause}$>$ ]\\
+\>\>[ $<${\em when-clause}$>$ ]\\
+\>\>[ $<${\em priority-clause}$>$ ]\\
+\mbox{}\\
+$<${\em trans-block}$>$\>=\>$<${\em CONSTANT-DEFN-PART}$>$\\
+\>\>$<${\em TYPE-DEFN-PART}$>$\\
+\>\>$<${\em VAR-DECL-PART}$>$\\
+\>\>$<${\em PROC-AND-FUNC-DECL-PART}$>$\\
+\>\>[ $<${\em trans-name}$>$ ] $<${\em STATEMENT-PART}$>$\\
+\mbox{}\\
+$<${\em trans-name}$>$\>=\>{\bf name} $<${\em IDENT}$>$ {\bf :}\\
+\end{tabbing}
+
+The ordering of the clauses is not important.
+Transitions with {\bf when} clauses are called {\em input
+transitions}
+as they are enabled only when some input condition occurs
+(i.e. some message is received); those without are {\em spontaneous
+transitions}. {\bf when} and {\bf delay} clauses are mutually exclusive.
+The optional $<${\em trans-name}$>$ is for documentation purposes
+only, and has no semantic effect.
+
+Notice that the $<${\em trans-decl-part}$>$ consists of zero or more
+$<${\em trans-decl}$>$s, each of which consists of a number of
+transitions preceded by the keyword {\bf trans}. This grouping is
+important, and affects two aspects: the nesting of clauses, and the
+interpretation of {\bf provided otherwise} clauses. We shall discuss
+the latter below. The nesting of clauses allows us to abbreviate
+transitions which have clauses in common. Clauses are held on a
+stack, which is affected in the following ways:
+
+\begin{itemize}
+\item upon entering a new $<${\em trans-decl}$>$, the stack is cleared.
+\item upon entering a new $<${\em clause-group}$>$, the stack is popped
+up to and including the clause type corresponding to the first clause
+in the $<${\em clause-group}$>$. For example, if the new $<${\em
+clause-group$>$} begins with a {\bf provided} clause, the stack will be
+popped up to and including the {\bf provided} clause on the stack, if
+any. If no such clause exists, the entire stack is popped.
+\item subsequent to this, all clauses in the new $<${\em clause-group}$>$
+are pushed on to the stack, one by one.
+\item Finally, when the $<${\em trans-block}$>$ is entered, all clauses
+currently on the stack are applicable to that block.
+\item Once clauses are being pushed on to the stack, no duplicates
+are allowed. For example, if a {\bf provided} clause is already
+stacked, the occurence of a {\bf provided} clause is illegal.
+\end{itemize}
+
+We will now examine each type of clause in more detail.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em provided-clause}$>$\>=\>{\bf provided} ($<${\em BOOLEAN-EXPR}$>|$ {\bf otherwise})
+\end{tabbing}
+
+The {\bf provided} clause specifies a Boolean condition which
+must be met for the transition to be enabled. If it is
+omitted, it is assumed TRUE. {\bf otherwise} is only permitted as
+the last clause of a transition group; it is TRUE is all other
+{\bf provided} clauses in the transition group are FALSE.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em from-clause}$>$\>=\>{\bf from} $<${\em from-list}$>$\\
+\mbox{}\\
+$<${\em from-list}$>$\>=\>$<${\em from-element}$>$ \{ {\bf ,} $<${\em from-element}$>$
+\}\\
+\mbox{}\\
+$<${\em from-element}$>$\>=\>$<${\em state-IDENT}$>|<${\em
+state-set-IDENT}$>$\\
+\mbox{}\\
+$<${\em to-clause}$>$\>=\>{\bf to} $<${\em to-element}$>$\\
+\mbox{}\\
+$<${\em to-element}$>$\>=\>{\bf same} $|<${\em state-IDENT}$>$
+\end{tabbing}
+
+The $<${\em from-list}$>$ in a $<${\em from-clause}$>$ specifies those states
+from which a transition may be validly executed; if it is
+omitted, it is assumed satisfied. The $<${\em to-element}$>$
+specifies the next state after the execution of the
+transition; if it is omitted or same then the state does not
+change.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em when-clause}$>$\>=\>{\bf when} $<${\em when-ip-ref}$>$ {\bf .} $<${\em
+interaction-IDENT}$>$\\
+\>\>\>[ $<${\em interaction-arg-list}$>$ ]\\
+\mbox{}\\
+$<${\em when-ip-ref}$>$\>=\>$<${\em ip-IDENT}$>$ [ {\bf [} $<${\em ip-index}$>$
+\{ {\bf ,} $<${\em ip-index}$>$ \} {\bf ]} ]\\
+\mbox{}\\
+$<${\em ip-index}$>$\>=\>$<${\em CONSTANT}$>|<${\em VAR-IDENT}$>$\\
+\mbox{}\\
+$<${\em interaction-arg-list}$>$\>=\>( $<${\em interaction-arg-IDENT}$>$\\
+\>\>\>\{ {\bf ,} $<${\em interaction-arg-IDENT}$>$ \} )\\
+\end{tabbing}
+
+A {\bf when} clause is satisfied if the interaction specified
+by the $<${\em interaction-IDENT}$>$ is at the head of the queue
+associated with the interaction point indicated by the
+$<${\em when-ip-ref}$>$. The interaction at the head of the queue is
+only dequeued as part of the execution of the transition.
+The $<${\em interaction-arg-list}$>$ is optional; if it is included,
+it must be complete and in the same order as in the
+corresponding $<${\em interaction-defn}$>$. Section \ref{IPC} discusses
+interactions in more detail.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em delay-clause}$>$\>=\>{\bf delay (} ($<${\em EXPR}$>$ {\bf ,} $<${\em
+EXPR}$>$\\
+\>\>\>$|<${\em EXPR}$>$ {\bf , *}\\
+\>\>\>$|<${\em EXPR}$>$)\\
+\>\>\>{\bf )}
+\end{tabbing}
+
+Some transitions may contain {\bf delay} clauses specifying a
+minimum and maximum delay time; provided these are
+interpreted consistently time in the Estelle model is
+considered implementation dependent. A {\bf delay} clause
+ 
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=mmmm\=\+\kill
+\>{\bf delay (E1,E2)}\\
+\end{tabbing}
+ 
+specifies that the transition should not be selected for
+execution before E1 consecutive time-units of it being
+enabled have elapsed. Once E1 has elapsed, the transition
+may or may not be selected for execution (due to
+nondeterminism), even if it is the only transition enabled.
+However, once E2 units have elapsed, if the transition is
+the only one enabled it must be selected. ``{\bf delay (E)}'' is
+the same as ``{\bf delay (E,E)}''. An asterisk for the second
+expression indicates that there is no upper bound, so it is
+possible the transition may never be selected for execution.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em priority-clause}$>$\>=\>{\bf priority} $<${\em priority-constant}$>$\\
+\mbox{}\\
+$<${\em priority-constant}$>$\>=\>$<${\em UNSIGNED-INTEGER}$>|<${\em
+CONSTANT-IDENT}$>$\\
+\end{tabbing}
+
+{\bf priority} clauses are used to attach priorities to
+transitions. Note that priorities are only relevant amongst
+peer processes, as parent transitions always have priority
+over children transitions. If the {\bf priority} clause is
+omitted, the lowest priority is assumed. Zero is the
+highest priority, after which they decrease systematically.
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em any-clause}$>$\>=\>{\bf any} $<${\em domain-list}$>$ {\bf do}\\
+\mbox{}\\
+$<${\em domain-list}$>$\>=\>$<${\em IDENT-LIST}$>$ {\bf :} $<${\em
+ORDINAL-TYPE}$>$\\
+\>\>\>\{ {\bf ;} $<${\em IDENT-LIST}$>$ {\bf :} $<${\em ORDINAL-TYPE}$>$
+\}\\
+\end{tabbing}
+
+{\bf any} clauses provide a shorthand way of specifying a
+number of clauses. A transition with an any clause is
+equivalent to as many transitions as there are distinct
+values in the $<${\em ORDINAL-TYPE}$>$, one for each possible value.
+The identifiers in an {\bf any} clause will typically be array
+indexes used to refer to arrays of interaction points in
+{\bf provided} clauses.
+ 
+The EFSM represented by a module body has all its initial
+states defined in the initialisation part:
+
+\begin{tabbing}
+mm\=mmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em init-part}$>$\>=\>\{ {\bf initialize} $<${\em trans-group}$>$ \}\\
+\end{tabbing}
+
+The initialisation transition group is executed only once
+when a module instance is created. Only one transition
+block is executed, even if several are enabled (the choice
+being nondeterministic). Only {\bf to} and {\bf provided} clauses are
+allowed in the initialisation part.
+
+As was mentioned in the previous section, systems allow
+for synchronous parallel execution, while activities allow
+nondeterministic sequential execution. The fact that we
+have both concurrency and nondeterminism means that at any
+stage, several transitions may be offered for execution. A
+transition offered by a parent always has priority over one
+offered by a child. If a parent offers no transition but
+its children do, we first determine, for each child, the
+transition(s) selected for execution. If the parent is a
+(system)process then all of these transitions are selected
+for execution; otherwise one child is selected (the choice
+is nondeterministic) and its transition(s) used. This may
+be made more precise as follows:
+
+Consider the process hierarchy as a tree. The
+transitions selected for execution ({\em $AS(gid_{P})$}) may be
+synthesised bottom up using the following definition for any
+particular non-leaf node {\em $P$} with children {\em $P_{i}$}:
+ 
+\begin{itemize}
+\item If {\em $P$} is active and offers a non-null transition, then this
+ transition is selected (Parent priority).
+\item Otherwise, if {\em $P$} is an (system)activity, then {\em
+$AS(gid_{P})$} is one of the {\em $AS(gid_{P_{i}})$} (the choice is
+nondeterministic).
+\item Otherwise, if {\em $P$} is a (system)process, then {\em
+$AS(gid_{P})$} is the union of all the {\em $AS(gid_{P_{i}})$} (parallel execution).
+\end{itemize}
+ 
+The execution of a specification thus proceeds as
+follows: for each system, a set of transitions are selected
+for execution. Once selected, a transition must eventually
+execute. Once all of the selected transitions have been
+executed for all systems, a new set is selected for each
+system, and the process repeats.
+ 
+State transitions are atomic; thus, for the execution of
+Estelle specifications on uniprocessing systems, a process
+scheduler may be invoked upon the completion of any state
+transition to select the next transition (and hence process)
+for execution.
+
+
+\subsection[Interprocess Communication]{Interprocess
+Communication}
+\label{IPC}
+
+Interprocess communication in Estelle is by message or
+{\em interaction} passing on bidirectional FIFO message queues
+({\em channels}) connected at their endpoints ({\em interaction
+points}). As the process hierarchy may be an arbitrary
+structure, the interconnections between processes may span
+several levels of the hierarchy. Estelle does not allow the
+direct connection of any one interaction point to any other
+interaction point; instead, a connection between two
+processes must be established by a common parent of both
+processes (which may in fact be one of the processes
+involved). The Estelle {\bf attach} statement then allows for the
+extension of the connection down the process hierarchy as
+necessary. It is important to distinguish between {\bf attach}
+and {\bf connect}; {\bf connect} is used to establish connections while
+{\bf attach} is used to extend those connections down through the
+process hierarchy.
+
+Each interaction point may be used to send interactions,
+and is also associated with a FIFO queue (which may be
+shared by other interaction points of the same module) from
+which it can receive interactions. The set of interactions
+which may validly be sent and received through an
+interaction point are determined by the interaction point's
+$<${\em channel-defn}$>$.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmn\=mm\=mm\=\+\kill
+$<${\em channel-defn}$>$\>=\>$<${\em chan-heading}$><${\em chan-block}$>$\\
+\mbox{}\\
+$<${\em chan-heading}$>$\>=\>{\bf channel} $<${\em chan-IDENT}$>$ {\bf (} $<${\em role-list}$>$
+{\bf ) ;}\\
+\mbox{}\\
+$<${\em role-list}$>$\>=\>$<${\em role-IDENT}$>$ {\bf ,} $<${\em role-IDENT}$>$\\
+\mbox{}\\
+$<${\em chan-block}$>$\>=\>+\{ $<${\em interaction-group}$>$ \}\\
+\mbox{}\\
+$<${\em interaction-group}$>$\>=\>{\bf by} $<${\em role-IDENT}$>$ [ {\bf ,} $<${\em role-IDENT}$>$ ] {\bf
+:}\\
+\>\>\>+\{ $<${\em interaction-defn}$>$ \}\\
+\mbox{}\\
+$<${\em interaction-defn}$>$\>=\>$<${\em interaction-IDENT}$>$\\
+\>\>\>[ {\bf (} $<${\em VALUE-PARAM-SPECIFICATION}$>$\\
+\>\>\>\{ {\bf ;} $<${\em VALUE-PARAM-SPECIFICATION}$>$ \} {\bf )} ] {\bf ;}\\
+\end{tabbing}
+
+As can be seen, an interaction can have a number of value
+parameters; none of these may be of a pointer-containing
+type. For a given interaction point, a module assumes a
+role declared by a $<${\em role-IDENT}$>$. A module may send
+interactions associated with its assumed role; a module that
+assumes the opposite role may receive interactions
+associated with the first role.
+ 
+An interaction point is an abstract bidirectional
+interface through which a module may send or receive
+interactions. Each interaction point has three attributes:
+
+\begin{itemize}
+\item the channel
+\item the role
+\item the queueing discipline
+\end{itemize}
+
+Any interaction associated with the role may be sent
+through the interaction point; any interaction associated
+with the opposite role may be received through the
+interaction point.
+ 
+The queueing discipline determines whether the queue
+associated with that interaction point may be shared with
+other interaction points of that module instance or not
+(common or individual).
+
+\begin{tabbing}
+mm\=mmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em ip-decls}$>$\>=\>{\bf ip} +\{ $<${\em ip-decl}$>$ {\bf ;} \}\\
+\mbox{}\\
+$<${\em ip-decl}$>$\>=\>$<${\em IDENT-LIST}$>$ {\bf :} $<${\em ip-type}$>$\\
+\>\>$|<${\em IDENT-LIST}$>$ {\bf : array [} $<${\em index-type-list}$>$ {\bf
+]}\\
+\>\>\>{\bf of} $<${\em ip-type}$>$\\
+\mbox{}\\
+$<${\em ip-type}$>$\>=\>$<${\em chan-IDENT}$>$ {\bf (}$<${\em role-IDENT}$>${\bf )}
+[$<${\em q-discipline}$>$]\\
+\mbox{}\\
+$<${\em index-type-list}$>$\>=\>$<${\em INDEX-TYPE}$>$ \{ {\bf ,} $<${\em INDEX-TYPE}$>$
+\}\\
+\end{tabbing}
+
+Interaction points may be referenced only by the
+operations {\bf connect}, {\bf attach}, {\bf disconnect}, {\bf
+detach}, the {\bf when}
+clause of a transition, and in the {\bf output} statement.
+Internal interaction points, which are defined in the $<${\em decl-
+part}$>$ of a $<${\em body-defn}$>$, may only be bound and unbound using
+{\bf connect} and {\bf disconnect}.
+
+\begin{tabbing}
+mm\=mmmmmmmmmmmm\=mm\=mmmm\=\+\kill
+$<${\em connect-stmnt}$>$\>=\>{\bf connect} $<${\em connect-ip-ref}$>$ {\bf to} $<${\em
+connect-ip-ref}$>$\\
+\mbox{}\\
+$<${\em connect-ip-ref}$>$\>=\>$<${\em internal-ip-ref}$>|<${\em
+child-extern-ip-ref}$>$\\
+\mbox{}\\
+$<${\em disconnect-stmt}$>$\>=\>{\bf disconnect} ($<${\em connect-ip-ref}$>|<${\em
+module-var}$>$)\\
+\mbox{}\\
+$<${\em attach-stmnt}$>$\>=\>{\bf attach} $<${\em external-ip-ref}$>$
+{\bf to} $<${\em child-extern-ip-ref}$>$\\
+\mbox{}\\
+$<${\em detach-stmnt}$>$\>=\>{\bf detach} ($<${\em external-ip-ref}$>$
+$|<${\em child-extern-ip-ref}$>$)\\
+\mbox{}\\
+$<${\em internal-ip-ref}$>$\>=\>$<${\em ip-ref}$>$\\
+\mbox{}\\
+$<${\em external-ip-ref}$>$\>=\>$<${\em ip-ref}$>$\\
+\mbox{}\\
+$<${\em child-extern-ip-ref}$>$\>=\>$<${\em module-variable}$>${\bf .}$<${\em
+external-ip-ref}$>$\\
+\mbox{}\\
+$<${\em ip-ref}$>$\>=\>$<${\em ip-IDENT}$>$ [ {\bf [} $<${\em
+INDEX-EXPR}$>$\\
+\>\>\>\{ {\bf ,} $<${\em INDEX-EXPR}$>$ \} {\bf ]} ]\\
+\end{tabbing}
+
+The two interaction points referenced must be declared
+with identical channel identifiers, and opposite role
+identifiers for {\bf connect} or identical role identifiers for
+attach. After execution of the {\bf connect} statement, any
+interactions output through an interaction point are
+received at the other (or its descendants if that
+interaction point is attached). A {\bf connect} statement may
+connect internal interaction points and child external
+interaction points together in any combination.
+ 
+The {\bf disconnect} statement causes the specified interaction
+point, or all connected external interaction points of the
+specified child module instance to be unbound. The
+interactions for the interaction point(s) still remain in
+the queue, and may still be processed.
+ 
+The {\bf attach} statement attaches two interaction points, the
+first of which may be currently bound and the second of
+which may later be bound by an action of the child. An
+interaction point at the end of a sequence of bound
+interaction points is a {\em connection endpoint}. {\bf output}
+statements at connection endpoints always cause their
+interactions to be queued at the interaction point bound to
+the opposite connection endpoint.
+ 
+When the {\bf attach} statement is executed, interactions
+present in the external interaction point queue which came
+through this queue are removed, and appended to the queue of
+the external interaction point of the lowest level
+descendant module instance which attached to the child
+external interaction point. The interactions for two
+interaction points whose queuing option is individual queue
+within a parent module may be combined into a common queue
+of a child through {\bf attach} operations.
+ 
+The {\bf detach} statement causes the specified interaction
+point and the one (and only one) to which it has been
+attached to be unbound. Any interactions queued at a
+connection endpoint at a lower level than the current level
+which were sent via the specified interaction point are
+appended onto the interaction point's queue before the
+interaction points are detached. A variant of this is called
+simple detach; in this case no interactions are moved. The
+terminate statement uses simple detaches rather than the
+conventional detach.
+
+\begin{tabbing}
+mm\=mmmmmmmmnn\=mm\=mmmm\=\+\kill
+$<${\em output-stmt}$>$\>=\>{\bf output} $<${\em interaction-ref}$>$[$<${\em
+ACTUAL-PARAM-LIST}$>$]\\
+\mbox{}\\
+$<${\em interaction-ref}$>$\>=\>$<${\em ip-ref}$>$ {\bf .} $<${\em
+interaction-IDENT}$>$\\
+\end{tabbing}
+
+The {\bf output} statement results in the interaction (plus its
+parameters, if any) to be appended onto the queue assigned
+to the (other) connection endpoint. Outputs made through an
+external interaction point may be observed in the target
+queue only after the whole issuing transition is completed,
+due to the atomicity of transitions.
+
+Interactions are received and removed from queues by
+executing transitions with {\bf when} clauses. It may be necessary
+to examine a queue without dequeuing an interaction, if the
+transition containing the {\bf when} clause also contains a
+{\bf provided} clause which refers to one or more of the
+interaction paramaters. In this case, the interaction at the
+head of the queue (assuming the {\bf when} clause is satisfied)
+must first be examined to ensure that the provided clause is
+also satisfied, before the interaction can actually be
+dequeued.
+
+
+

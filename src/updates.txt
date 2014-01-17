@@ -1,0 +1,96 @@
+Version 1.1 Enhancements
+=========================
+
+Reassignment of F9 and F10, with enhanced execute command.
+Fixed Ctrl-G/Ctrl-P cyclic bug
+Fixed bug in scheduler (more precisely, in _Delay).
+PC-Linted, with bug fixes.
+Added functions QLength GlobalTime and FireCount.
+Added scheduler indicator 's' in left source window border
+Output routines now write to log file as well if logging is on.
+The current state is shown in the log file with each process.
+Added compiler directive $On to control output (WRITEs), where n is:
+	0 - no output
+	1 - log file only
+	2 - screen only
+	3 - both
+Added option to editor to reseed random number generator.
+Added a semaphore to prevent quitting during initialisation of a
+module, as data structures such as the module tables are in a fluid
+state, and attempting to recursively dump an execution summary is
+dangerous at this stage.
+Added conditional code to support a E-code level debugging. The child
+window is replaced by a stack window, and the IP window is replaced
+by a Op window (non-scrollable). F2 steps on E-code instructions.
+Shift-F10 toggles this mode on and off. Shift-F9 dumps the stack to
+the printer. To change process, first go out of this mode. The
+inialization of the stack is indicated by v-var, x-exvar and p-param.
+
+Shift-F1 and Shift-F2 allow the window sizes to be changed.
+
+
+Version 1.2 Enhancements
+=========================
+
+Some reachability and deadlock analysis has been added.
+Compiler warnings have been implemented as a result.
+Help on compiler errors and warnings has been implemented and
+supplied.
+The ANALYZE menu has been added.
+ANY constants are now supported.
+The TERMINATE statement has been added.
+The syntax of transitions now agrees with the standard, and nested
+transitions are supported.
+The DETACH <module variable> is now supported.
+DELAYS can have either uniform, Poisson or Exponential distributions.
+More bugs have been fixed.
+
+=====================================================================
+
+To ADD:
+Check which compiler errors can be changed to warnings?
+
+The restricted version of ANY (or an unrestricted implementation, but
+a restricted (ie single domain variable) version will be much easier,
+as this can be incorporated into OP_TRANS, and a special type of
+variable can be used. In fact, this can be generalised by using an
+instruction:
+	ANYVAR <num>
+to push the value of the variable on to the stack, and a table:
+	ANYVARRANGE(<min>,<max>)
+	....
+	ANYVARRANGE(<min>,<max>)
+for the ranges. A label can then be added to OP_TRANS to point to
+this table; if it is -1, then no any clause exists. This seems like
+the best plot. I can add a special kind, ANYVAR, to the symbol table
+for these, although that may cause a lot of work, as I have to check
+all the places where they may be used (namely, anywhere a variable
+can be used) to see if changes must be made. A better plot would be
+to make these like any other variables declared local in the trans
+block, and treat them as ordinary variables that are never explicitly
+assigned to but instead set up by the TRANS instruction. Of course,
+if there are explicit assignments to them, these should cause a
+compiler error I would think.
+
+When evaluating clauses, and hopefully for display and log purposes
+as well, it seems like overkill to evaluate those that fail on their
+FROM clause any further. Avoiding these should lead to a reasonable
+speed increase. For displaying, the state of clause evaluation should
+be indicated with a '?', while for logging, each transition could be
+numbered, and only the relevant ones printed.
+
+What happens when a PROVIDED clause involves arguments from a WHEN
+clause, and the WHEN clause fails? I've noticed that often the
+PROVIDED clause is still indicated as being enabled, but it should
+fail automatically. Fix this up when time permits (it isn't critical,
+unless it could cause data corruption).
+
+LOW PRIORITY - Get tabs working in editor
+
+The entire process browser should probably be rewritten. How about a
+table of functions (indexed on window) which are passed a line number
+and return a text line and flag indicating whether this is the
+highlight line. Well, maybe it should be examined more carefully. The
+code at the moment is a hack. A good hack, but a hack nontheless.
+
+

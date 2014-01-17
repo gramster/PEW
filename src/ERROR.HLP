@@ -1,0 +1,542 @@
+@0 MEMFAIL
+An attempt to allocate memory failed. This error often results in
+the PEW aborting. If you have been editing a file, this will be
+saved to a temporary file and a message to that effect will be
+printed.
+
+@1 BADFREE
+Internal error; only occurs in development version.
+
+@2 MEMTABLEFULL
+Internal error; only occurs in development version.
+
+@3 NOSAVESCR
+You attempted to run a DOS shell but the PEW could not
+allocate sufficient memory to save the screen contents. In this
+case, it is very unlikely that a shell could be executed successfully
+anyway!
+
+@4 NOSHELL
+You attempted to run a DOS shell but the PEW could not find
+your copy of COMMAND.COM.
+
+@5 NOMEM
+An attempt to run a DOS shell failed due to lack of available
+memory.
+
+@6 BADSHELL
+An error occurred during an attempt to run a DOS shell. The number
+corresponds to the DOS error code for whatever error occurred.
+
+@7 BADINT
+You executed some command which expected a number as input but
+found something else instead.
+
+@8 RECMACRO
+You attempted to begin recording a keystroke macro while one was
+already being recorded. Keystroke macros cannot be nested.
+
+@9 PLAYMACRO
+You attempted to play back a keystroke macro while busy recording
+one. This is not permitted by the PEW.
+
+@10 MACROKEY
+Keystroke macros can only be assigned to the keys Alt-0 through Alt-9.
+
+@11 MACROLEN
+You exceeded the keystroke macro buffer size (currently 128
+keystrokes).
+
+@24 ENDLIBERRS
+Dummy entry - signifies end of library errors, start of application errors
+
+@25 BAD_ARGUMENT
+This is an internal error. It should never occur. If it does,
+please report the error message and the situation in which it occurred
+to the DNA Laboratory, UCT.
+
+@26 NOOPENFL
+You attempted to load a nonexistent file into the editor.
+
+@27 BADLINE
+You attempted to execute a Goto Line command to a line which
+does not exist.
+
+@28 BADTSTOP
+You entered an invalid tab stop value.
+
+@29 REPORT
+These are internal assertion violations, and should never occur.
+
+@30 NOHLPINDX
+You are missing one or both of the {\em PEW} help files in your
+PEWPATH directory, or current directory if the PEWPATH environment
+variable is not being used. Check that you have these files, and that
+you are in the same directory as them, or they are in the directory
+specified by PEWPATH.
+
+@31 NOHELPTEXT
+You are missing one or both of the {\em PEW} help files in your
+PEWPATH directory, or current directory if the PEWPATH environment
+variable is not being used. Check that you have these files, and that
+you are in the same directory as them, or they are in the directory
+specified by PEWPATH.
+
+@32 AMBIGUOUS
+You declared an identifier that has already been declared.
+
+@33 ASSIGNMENT
+You are attempting an assignment of incompatible types.
+
+@34 COMMENT
+You have not terminated a comment; the end of the file was reached
+while still in the comment.
+
+@35 COMPATIBLE
+You are attempting to operate on types that are not compatible.
+
+@36 FUNC
+You have already declared the types of the function's parameters in
+an earlier forward declaration.
+
+@37 INTEGER
+You have used an integer constant which is out of the range --32768..+32767.
+
+@38 LABEL
+You have a GOTO to an undefined or invalid label.
+
+@39 STRING
+A non-printable character was reached before the end of the string.
+You may not have terminated the string properly.
+
+@40 FUNCTION
+You cannot assign to the function variable at this scope level.
+
+@41 SET
+All set elements must have values in the range 0..63. This means,
+for example, that sets of alphabetic characters are not allowed.
+
+@42 TIME
+Valid timescales are HOURS, MINUTES, SECONDS, MILLISECONDS and
+MICROSECONDS.
+
+@43 NODEFAULT
+You declared an interaction point without a queue discipline, and
+no default queue discipline has been specified.
+
+@44 SYSTEMCLASS
+You declared a module with body transitions but no process or
+activity attribute.
+
+@45 LABELS
+You have exceeded the allowed number of labels.
+
+@46 LEVEL
+You have exceeded the allowed number of scope levels.
+
+@47 ORDINAL
+An ordinal type was expected where some other type was used.
+
+@48 POINTER
+A pointer type was expected where some other type was used.
+
+@49 PROC
+You have already declared the types of the procedure's parameters in
+an earlier forward declaration.
+
+@50 RANGE
+A value which was out of the legal range was found. You may be
+assigning an integer to a variable which is of some subrange or
+enumeration type.
+
+@51 REPETITION
+You have used a case constant more than once within the same case
+statement.
+
+@52 ROLES
+You have used the same role twice in a single role list.
+
+@53 SELECTORTYPE
+The case selector constant expression is of a different type to the
+case selector index expression.
+
+@54 SIGNED
+Only integers may be signed; you have used a unary minus with some
+other type.
+
+@55 STATES
+You have already had a state-definition part in the current set of
+declarations; you may not have two.
+
+@56 TYPE
+You have used a type in an inappropriate place.
+
+@57 UNDEFINED
+You have referenced an identifier that has not previously been
+declared.
+
+@58 LOOPVAR
+You may not assign to loop control variables within loops.
+
+@59 CONTROLVAR
+Loop control variables must be local variables.
+
+@60 CONTROLPARAM
+The variable you are using to control a loop is of an inappropriate
+type.
+
+@61 UNRESOLVED
+You have a GOTO to a label which is never defined.
+
+@62 INDICES
+You have used a case constant expression which is out of the
+allowed range 0..255.
+
+@63 DUPCLAUSE
+You have more than one clause of the same type associated with 
+the same transition block.
+
+@64 SYMBOLSPC
+The specification you are attempting to compile has exhausted the
+symbol table space. Try to reduce the number of declarations you
+have. Eliminate type declarations that are only used once, and add
+type declaractions where these are implicit and used several times.
+
+@65 SPECTOOBIG
+The string store which is used to store identifier names is full.
+Use shorter identifier names.
+
+@66 ANY
+The ANY clause is not implemented in Version 1.x of the PEW.
+
+@67 ANYCONST
+ANY constants must be of simple types. The PEW will compile a 
+specification using ANY constants as thought the smallest
+non-negative allowed value for the ANY constant was specified,
+or if this is not possible, the largest negative value.
+
+@68 ANYTYPE
+ANY (...) types are not implemented in the PEW.
+
+@69 DISPOSE
+Only the basic form of DISPOSE is allowed; the variant form
+is not implemented.
+
+@70 EXTERNAL
+The PEW only allows complete specifications that are
+executable; EXTERNAL functions and procedures are thus not allowed.
+
+@71 FUNCPARAM
+Functional parameters have not been implemented in Version 1.x of the PEW.
+
+@72 NEW
+Only the basic form of NEW is allowed; the variant form
+is not implemented.
+
+@73 PACK
+The PEW does not support type packing.
+
+@74 PRIMITIVE
+The PEW only allows complete specifications that are
+executable; PRIMITIVE functions and procedures are thus not allowed.
+
+@75 PROCPARAM
+Procedural parameters have not been implemented in Version 1.x of the PEW.
+
+@76 WITH
+The identifier following WITH is not a record.
+
+@77 ESTELLE
+You have used an Estelle construct that is prohibited within Pascal
+functions and procedures.
+
+@78 GOTO
+GOTOs are only allowed within procedures and functions.
+
+@79 MODVAR
+You have used a module variable in a context where it may not be
+used.
+
+@80 NOIDENT
+The compiler expected an identifier but got something else.
+
+@81 NOINTEGER
+The compiler expected an integer but got something else.
+
+@82 BADLOOP
+The keyword TO or DOWNTO was expected as the compiler
+is processing a FOR loop.
+
+@83 BADFACTOR
+You have an illegitimate identifier reference in an expression.
+
+@84 BADCONSTANT
+A constant was expected but not found.
+
+@85 BADFORMLPARM
+A syntax error in a formal parameter list occurred.
+
+@86 BADCLAUSE
+The compiler expected a transition but got something else.
+
+@87 SYNTAX
+Some kind of syntax error occurred.
+
+@88 BADROLES
+To ATTACH two interaction points, they must have the same
+roles. To CONNECT two interaction points, they must have
+opposite roles. You violated one of these rules.
+
+@89 CODEFULL
+You have exhausted the size of the code buffer.
+
+@90 ECUSEAGE
+
+@91 NOSOURCE
+Used by stand-alone compiler only.
+
+@92 NOTARGET
+Used by stand-alone compiler only.
+
+@93 NOSEMICOLON
+The PEW expected a ';' but got something else.
+
+@94 NOCOLON
+The PEW expected a ':' but got something else.
+
+@95 NORIGHTPAR
+The PEW expected a ')' but got something else.
+
+@96 NOLEFTPAR
+The PEW expected a '(' but got something else.
+
+@97 NOCOMMA
+The PEW expected a ',' but got something else.
+
+@98 NOEND
+The PEW expected the reserved word END but got something else.
+
+@99 NODO
+The PEW expected the reserved word DO but got something else.
+
+@100 NOLEFTBRAK
+The PEW expected a '[' but got something else.
+
+@101 NOPERIOD
+The PEW expected a '.' but got something else.
+
+@102 NORIGHTBRAK
+The PEW expected a ']' but got something else.
+
+@103 NOOF
+The PEW expected the reserved word OF but got something else.
+
+@104 NOLOGOPEN
+The PEW failed to open the file ESTELLE.LOG. You may
+have some other application running, or your disk may be full. If you
+are running from a floppy disk, you may have a write-protect sticker
+on your disk.
+
+@105 IPEMPTY
+This is an internal error. It should never occur.
+
+@106 NOCONNECT
+You have attempted to execute an OUTPUT statement to an
+unbound interaction point.
+
+@107 BIGSOURCE
+Version 1.x of the PEW allows a maximum of 5000 source lines in
+a single specification.
+
+@108 ILLEGALOP
+This is an internal error. It can only occur if stack overflow
+occurred but was never detected. It is unlikely to ever happen.
+
+@109 STACKOVR
+A process's stack has exceeded its bounds. Process stacks are
+usually expanded dynamically as required, unless the process performs
+dynamic memory allocation using NEW, at which point the stack
+is expanded by 1000 words and then frozen in size.
+
+@110 OUTRANGE
+A variable of some ordinal type has exceeded its allowed range of
+values.
+
+@111 BADCONNECT
+An interaction point that is already bound was referenced in a
+CONNECT statement.
+
+@112 BADATTACH
+An interaction point that is already bound was referenced in a
+ATTACH statement.
+
+@113 2MANYWHEN
+As the PEW checks for interactions that cannot be dealt with,
+it maintains data structures for this purpose. You are attempting to
+execute a specification which exceeds the available data structure
+space for this purpose.
+
+@114 BADEXPORT
+You have declared an exported variable which is not a Pascal
+variable type.
+
+@115 NOTEXPORTED
+An exported variable reference was found by the compiler, but the
+variable referenced is not an exported variable.
+
+@116 EXIST
+An inappropriate identifier was used in one of these constructs.
+
+@117 MODEXIST
+Module domains for these constructs may have only a single module
+variable.
+
+@118 MIXEXIST
+These constructs allow both module and ordinal types, but not
+simultaneously.
+
+@119 DOMAINSIZE
+You have exceeded the maximum allowed length of a domain list.
+
+@120 POINTEROP
+You have attempted an operation on pointer types that is not
+permitted.
+
+@121 NEWFAIL
+An attempt to dynamically allocate memory failed because the
+request was too large or the stack is close to overflowing.
+
+@122 BADDISPOSE
+An attempt to dispose a memory block that is not a currently valid
+memory block allocated by NEW was made. It is likely that you
+have never done a NEW on this pointer before calling {\em
+DISPOSE.
+
+@123 FAILEXPAND
+Process stacks are expanded dynamically as
+required. If this fails, it is due to either low memory or the stack
+reaching its size limit (about 32kb).
+
+@124 BADINITTRANS
+Initialisation transitions may only have TO and 
+PROVIDED clauses.
+
+@125 CASEVALUE
+You have not dealt explicitly with each possible case for the case
+statement index expression type. 
+
+@126 BADBRKPT
+A reference to a non-existent breakpoint was made.
+
+@127 FIREENTRIES
+The PEW keeps track of the firing frequencies of all named transitions
+for use in the ANALYSIS menu's dependent expression evaluator. As
+space must be reserved for this data, there is a limit on how many named
+transitions are permitted in a specification.
+
+@128 WRONGROLE
+This error should never occur.
+
+@129 CLAUSENEST
+You have badly nested clauses in the current transition. Specifically,
+you have used a clause type that is already on the stack of clauses
+for this transition.
+
+@130 ZERODIV
+The next divide instruction to be executed by the PEW has a 
+zero-valued denominator.
+
+@131 BADSTEP
+The step size must be a non-zero value. This is true even when the
+start and end values are the same. In this case, any non-zero value
+will do. The PEW uses the step size in various division calculations,
+which is why this restriction is enforced.
+
+@132 INTRALLOCFAIL
+An attempt to allocate an interaction in an OUTPUT statement failed due to
+lack of available memory.
+
+@133 INITFAIL
+An attempt to execute an INIT statement failed as there was insufficient
+memory to allocate the module data structure.
+
+@134 METATRANS
+An attempt to allocate a transition flow table for the transition about to
+be executed failed.
+
+@135 MODSTACK
+An attempt to allocate a stack for the module currently being initialised
+failed due to lack of free memory.
+
+@136 MODVARTBL
+An attempt to allocate a module variable table for the module currently
+being initialised failed due to a lack of memory.
+
+@137 IPTBL
+An attempt to allocate an IP table for the module currently being initialised
+failed due to a lack of memory.
+
+@138 COMMONQ
+An attempt to allocate a common queue for the module currently being initialised
+failed as there is insufficient free memory available.
+
+@139 QUEUE
+An attempt to allocate an interaction reception queue for an IP of the module
+currently being initialised failed due to a lack of free memory.
+
+@140 TRANSTBL
+An attempt to allocate a transition table for the module currently being
+initialised failed due to a lack of free memory.
+
+@141 ECMEMFAIL
+An attempt was made by the compiler to allocate a large block of memory for
+use as a symbol table, but this attempt failed.
+
+@142 ECCODFAIL
+An attempt was made by the compiler to allocate a large block of memory for
+use as a code buffer, but this attempt failed.
+
+@143 MAXTRANS
+There is a limit to the number of transitions a process may have. The default
+is 64. This limit is necessary as certain internal tables need a maximum
+size specified. If you have the need for more transitions, you will have to
+obtain a version of the PEW that has been compiled with larger tables.
+
+@144 PRIORITY
+You have an OUTPUT statement that references an interaction which has
+a non-zero priority value. The channel type of the interaction is not
+a priority queueing channel, but a FIFO or random queueing channel, so
+no priority is allowed.
+
+@145 PROPDELAY
+You have an OUTPUT statement that references an interaction which has
+a non-zero propogation delay value. The channel type of the interaction
+point is not FIFO, so this is not allowed.
+
+@149 ENDERRS
+Dummy entry - indicates start of warnings
+
+@150 UNREACHABLE
+This state never occurs in a TO clause or a FROM..TO SAME clause pair.
+Thus it is not possible for it to ever be reached. This is not an error,
+but the state is redundant.
+
+@151 DEADLOCK
+If this state is reached, it can never be left, as there are no FROM
+clauses that are enabled in this state. The prescence of such a
+state indicates a design error in your specification.
+
+@152 WHENOUT
+This interaction is used in WHEN clause(s) but does not occur in
+any OUTPUT statements. The transition(s) that refer to it can thus
+never be enabled, and are redundant.
+
+@153 OUTWHEN
+This interaction is used in OUTPUT statement(s) but is never used
+in any WHEN clauses. This is a potential deadlock situation due
+to the strict FIFO nature of Estelle's queues.
+
+@154 UNREFINTR
+This interaction is never used in any WHEN clause or OUTPUT statement.
+
+

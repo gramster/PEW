@@ -1,0 +1,222 @@
+@ACTIVITY
+#SEE SYSTEMACTIVITY
+@ANY
+The "ANY" clause is not implemented in the PEW.
+@ATTACH
+The "ATTACH" statement attaches two specified interaction points, which
+must have the same channel types and identical roles. "ATTACH" statements
+are used to extend the connection of interaction points down the process
+hierarchy. At the lowest level we have connection endpoints; this is where
+interactions output through the opposite connection endpoint are queued.
+The first interaction point in the "ATTACH" statement must be external,
+while the second must be a child external interaction point. Either of
+these may already have been bound, by an action of the parent in the first
+case, and an action of the child in the second.
+@BODY
+The keyword "BODY" identifies a module body definition. These definitions
+specify module bodies and associate them with module headers.
+@BY
+#SEE CHANNEL
+@CHANNEL
+The keyword "CHANNEL" identifies a channel definition. Each channel definition
+consists of the channel identifier, its two roles, and the lists of
+interactions that may be sent "BY" interaction points associated with each
+role.
+@COMMON
+#SEE QUEUE
+@CONNECT
+The "CONNECT" statement connects two specified interaction points, which
+must have the same channel types and opposite roles. A process may not
+connect an interaction point that it has alrady bound. After connection,
+any interactions output through one of the interaction points is received
+at the other (or its descendant if it is attached). Interactions are
+queued according to the queueing discipline of the receiving interaction
+point.
+@DEFAULT
+The DEFAULT statement allows the default queue discipline of all queues that
+are not explicitly attributed to be specified. Allowed queue disciplines
+are COMMON and INDIVIDUAL.
+@DELAY
+The "DELAY" clause specifies time constraints for a transition. A "DELAY"
+clause may take either one or two arguments. The first argument specifies
+the minimum amount of time that must elapse before the transition may be
+executed, while the second argument, if present, specifies the maximum
+amount of time the transition can be enabled before it MUST be executed.
+If no second argument is given, it is assumed to be the same as the first
+argument. The PEW deals with the two argument case by selecting some time
+in between the two after which the transition will be executed.~
+The arguments should be integer expressions; however the second argument may
+be an asterisk '*' indicating that the transition has no upper bound on its
+execution time.~Note that standard Estelle specifies that "DELAY" and "WHEN"
+clauses cannot both occur in a single transition; the PEW does not enforce
+this constraint. Instead, the combination is treated as follows: the "WHEN"
+clause must be continuously satisfied for the duration of the delay for
+the transition to be executed. If at any stage during the delay the "WHEN"
+clause is no longer satisfied, the delay timer associated with the transition
+is reset.
+
+@DETACH
+A "DETACH" statement must be followed by a child external interaction point
+or internal interaction point identifier. The module executing the "DETACH"
+must be the same module that attached the interaction point. The result
+of a "DETACH" statement is that the interaction point and the one to which
+it is attached are unbound.
+@DISCONNECT
+A "DISCONNECT" statement must be followed by a child external interaction
+point, internal interaction point, or module variable identifier. The
+interaction point (or all external interaction points if a module variable
+was specified) and the one to which it has been connected are unbound.
+@EXPORT
+The keyword "EXPORT" identifies the start of a set of variable declarations
+that are accessible by the parent of a module as well as the module
+itself. The parent must qualify references to exported variables of
+children by preceding them with the name of an appropriate module variable.
+Only normal PASCAL variables may be exported.
+@EXTERNAL
+EXTERNAL procedures and functions are not implemented in the PEW.
+@FROM
+A "FROM" clause specifies the control states from which a transition may be 
+validly executed. Thus the "FROM" clause is part of the enabling conditions
+of a transition. The identifiers listed in a "FROM" clause need not be
+distinct, and may be any mix of state and state set identifiers. The
+abscence of a "FROM" clause implies that a transition may be executed
+regardless of the control state.
+@HOURS
+#SEE TIMESCALE
+@INDIVIDUAL
+#SEE QUEUE
+@INIT
+The "INIT" statement creates an initialises a module instance. It specifies
+a module variable, body identifier, and actual parameter list. An instance
+of a module of the appropriate body type is created, with the external
+visibility specified by the type of the module variable. The actual
+parameters are passed to this module instance, and a transition from its
+initialisation part, if any, is executed. The module instance is then
+associated with the module variable.
+@INITIALIZE
+The INITIALIZE section of a module specifies a set of transitions that may
+be selected from when an instance of the module is created with an INIT
+statement. At most one of the (enabled) initialisation transitions will
+be nondeterministically selected for execution. Initialisation transitions
+may contain only TO and PROVIDED clauses.
+@IP
+The IP keyword specifies the start of interaction point declarations. Each
+IP declaration consists of a list of identifiers followed by their type.
+The type of an IP consists of (an array of) the associated channel, role,
+and optional queue discipline.
+@MICROSECONDS
+#SEE TIMESCALE
+@MILLISECONDS
+#SEE TIMESCALE
+@MINUTES
+#SEE TIMESCALE
+@MODULE
+The MODULE keyword specifies a module header definition. Module headers
+specify the external visibility of modules. The information required to be
+specified is the module class, initialisation parameters, external
+interaction points, and exported variables.
+@MODVAR
+Module variables identify instances of modules. The "MODVAR" keyword 
+identifies the start of a set of module variable declarations. These
+are similar to normal variable declarations, but the type identifiers must
+be module header identifiers. When a module variable is initialised it will
+be bound to a module body type.
+@NAME
+The "NAME" construct is used to specify an optional name for a state
+transition. These names serve no purpose other than aiding readability,
+and are ignored by the PEW.
+@OUTPUT
+An output statement specifies an interaction point, interaction identifier, 
+and actual parameter list. The interaction specified by the interaction 
+identifier, together with its parameters, is appended to the reception
+queue of the connection endpoint of the specified interaction point.
+@PACKED
+Packed data types are not implemented in the PEW.
+@PRIMITIVE
+PRIMITIVE procedures and functions are not implemented in the PEW.
+@PRIORITY
+A "PRIORITY" clause orders transitions with respect to priority constants.
+Priority constants must be positive integers, with zero having the
+highest priority. The priority is used by the scheduler when selecting
+which transitions to fire from the set of enabled transitions.
+@PROCESS
+#SEE SYSTEMPROCESS
+@PROVIDED
+The "PROVIDED" clause is part of the enabling condition of a transition.
+It is satisfied if the Boolean expression foolowing the keyword "PROVIDED"
+evaluates to TRUE. A special case, "PROVIDED OTHERWISE", evaluates to TRUE
+if all provided clauses in the same transition group that lie between this
+clause and the previous "PROVIDED OTHERWISE" clause (if any) evaluate to
+FALSE. 
+@QUEUE
+Queue disciplines specify whether or not the queue can be shared by more
+than one interaction point. COMMON queues may be shared, but INDIVIDUAL
+queues may not.
+@RELEASE
+The "RELEASE" statement releases module instances at a lower hierarchy level.
+Firstly, all external interaction points of the module specified by the
+module variable following "RELEASE" are detached or disconnected, and then
+the module and all of its descendants are released and are no longer
+available. The value of all module variables which identified the released
+module are undefined, as though they were never initialised.
+@SAME
+#SEE TO
+@SECONDS
+#SEE TIMESCALE
+@SPECIFICATION
+A "SPECIFICATION" is an Estelle program. The specification should have a
+name, a class ("SYSTEMPROCESS" or "SYSTEMACTIVITY"), an optional  default
+queue discipline, optional timescale, a number of declarations and
+definitions of different objects, a set of zero or more initialisation
+transitions, and zero or more body transitions.
+@STATE
+If the control state space of the EFSM of a process is nonempty, it must
+have all of its possible states enumerated in a state definition part.
+@STATESET
+State sets provide a means of referring to several states at once. A state
+set is defined in the state set definition part, and is merely a shorthand
+notation for the list of its elements.
+@SYSTEMACTIVITY
+The classes "SYSTEMACTIVITY" and "ACTIVITY" specify modules that can parent
+ACTIVITY children only. (System)activities allow for nondeterministic
+sequential execution. When a (system)activity module offers no transitions for 
+execution, but its children do, then only one child is selected 
+(nondeterministically) for execution. The difference between systemactivities
+and activities is that systemactivities are all created as part of the
+initialisation of the specification, whereas activities may be freely
+created and destroyed at any stage. Other valid attributes are "PROCESS",
+"SYSTEMPROCESS", and unattributed.
+@SYSTEMPROCESS
+The classes "SYSTEMPROCESS" and "PROCESS" specify modules that can parent
+both PROCESS and ACTIVITY children. (System)processes thus allow for
+synchronous parallel execution. When a (system)process module offers no 
+transitions for execution, but its children do, then all of the transitions 
+offered by the children that are selected for execution are executed.
+The difference between systemprocesses and processes is that systemprocesses
+are all created as part of the initialisation of the specification, whereas
+processes may be freely created and destroyed at any stage. Other valid
+attributes are "ACTIVITY", "SYSTEMACTIVITY", and unattributed.
+@TIMESCALE
+The TIMESCALE of a specification specifies the implementors intentions as
+to what units of time the numbers used in delay clauses are meant to
+specify. The timescale has no semantic effect on the program. Valid
+timescales are HOURS, MINUTES, SECONDS, MILLISECONDS and MICROSECONDS.
+@TO
+A "TO" clause specifies the next state following the execution of a state
+transition. If there is no "TO" clause, or the state identifier in the "TO" 
+clause is "SAME", then the state does not change.
+@TRANS
+The TRANS section of a module specifies the body transitions for that module.
+At each iteration, the clauses of each transition of each active instance of
+the module are evaluated, and may be selected for execution, depending on the
+class of the module instance and its parent.
+@WHEN
+A "WHEN" clause is part of the enabling condition of a transition. It should
+specify an interaction point and interaction identifier, separated by a
+period.  The interaction identifier may be followed by an optional argument
+list. A "WHEN" clause is satisfied if the interaction at the head of the
+specified interaction point corresponds to the interaction identifier. The
+interaction is dequeued only as part of the execution of the transition. In
+standard Estelle, a "WHEN" clause cannot be used in the same transition as
+a "DELAY" clause, but this is not enforced by the PEW.
+

@@ -1,0 +1,47 @@
+% LISTS.STY - Various useful list macros
+
+% From Mert Cramer: (paraphrased)
+% I wanted an environment like the description environment (LaTeX book
+% page 26-27) but with constant width tags, rather than a set indentation
+% and various over- and under-lapping of the labels.
+% Leslie Lamport provided this over the phone after a little prodding for
+% use as in
+%   \begin{describe}{Biggest Flag}
+%     \item[flag] Blah blah ........
+%   \end{describe}
+%
+% You may want to increase the separation between paragraphs (list items)
+% by putting the command
+%   \parskip=1.0ex
+% after the \begin.  This will set the separation to the height of an x.
+
+\def\describe#1{\list{}{\settowidth{\labelwidth}{#1}\leftmargin\labelwidth
+\addtolength{\leftmargin}{\labelsep}
+\def\makelabel##1{##1\hfill}}}\let\enddescribe\endlist
+
+% Hanging tags for Description environments
+% I wanted to make a list that looked like
+%   item label
+%     text related to the item
+%     which continues on like this.
+%   next item
+%     blah blah blah
+%
+% So, now I do this:
+%  \begin{description}
+%    \hangitem{item label} text related to the item which continues
+%      on like this.
+%    \hangitem{next item} blah blah blah
+%  \end{description}
+% Instead of calling it a description, you can call it a hanglist
+% so when we get LaTeX 2.09 (Real Soon Now :-) ) we can do this
+% properly.  I had brought this up with Leslie Lamport and he
+% suggested a way that almost worked, and then decided he could
+% make a minor change to latex that would make this easy to do.
+% The main problem with this is that each \hangitem must have
+% text to go with it.  But if you have no text, then you can use just
+% a normal \item.
+\let\hanglist\description
+\let\endhanglist\enddescription
+\def\hangitem#1{\@item[#1] \hfil\break}
+

@@ -1,0 +1,77 @@
+\documentstyle[12pt,A4]{article}
+\begin{document}
+\thispagestyle{blank}
+{\LARGE Errata/Omissions in the {\em PEW} User Manual}
+
+\mbox{}
+
+{\large p.5 Release Contents and Installation}
+
+\mbox{}
+
+Two files have been added: {\em PEWDEMO.DAT} containing a
+demonstration script for the {\em PEW}, and {\em DEMO.BAT}, a batch
+file which runs the demonstration.
+
+\mbox{}
+
+{\large p.7 The Main Menu}
+
+\mbox{}
+
+From 4th last line ("If one of...") to last line ("...to select a
+menu item.") is much clearer if read as "If one of the two submenus ({\em File} or
+{\em Options}) is invoked, and subsequently exited by pressing {\em
+ESC}, you will be placed on the main menu but the submenu will close.
+You can then move around the main menu with the left and right
+cursor keys, and press {\em ENTER} to select a main menu item."
+
+\mbox{}
+
+{\large p. 25 }
+
+\mbox{}
+
+Last paragraph, 3rd line: "This example..." to 4th last line
+"...network body type." is incorrect. This sentence should read:
+"This example shows three breakpoints: the first is set on the 
+{\em ack\_wait $\rightarrow$ ack\_wait} transition of the {\em
+alternating\_bit[1]} process being enabled;
+the second is a breakpoint on an {\em Output}
+statement to the {\em n} interaction point of all processes having
+the {\em alternating\_bit} body type, and the third is a line
+breakpoint set on line 165." Note that suspended
+breakpoints are displayed with parentheses about their numbers in the
+breakpoint browser.
+
+\mbox{}
+
+{\large p28. Some more figures}
+
+\begin{itemize}
+\item Program size: 145kB (+7kB errors + 30kB help)
+\item {\em PEW} help screens: 98
+\item Language help: 34 screens indexed on 46 keys
+\item Maximum number of {\em failed} When clauses per process: 32
+\end{itemize}
+
+\mbox{}
+
+{\large p36. Stack overflow}
+
+\mbox{}
+
+As E-Code is stack-based all variables are allocated on the stack. 
+This should be borne in mind when declaring variables, as stack space
+is limited.
+
+\mbox{}
+
+{\large p36. Too many failed WHEN clauses in process}
+
+\mbox{}
+
+The maximum number allowed of failed When clauses within a single
+process is 32.
+\end{document}
+

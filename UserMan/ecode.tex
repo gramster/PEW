@@ -1,0 +1,1063 @@
+\documentstyle[11pt,A4]{article}
+
+\newcommand{\SEX}[2]{
+\begin{tabbing}
+mmmmmmmmmmmmm\=\kill
+{\bf Stack on #1}: $\rightarrow$\>
+\+
+#2\\
+\end{tabbing}
+}
+
+\newcommand{\SQEX}[3]{
+\begin{tabbing}
+mmmmmmmmmmmmm\=\kill
+{\em #3:}\\
+{\bf Stack on #1}: $\rightarrow$\>
+\+
+#2\\
+\end{tabbing}
+}
+
+\newcommand{\SE}[1]{\SEX{Entry}{#1}}
+
+\newcommand{\SX}[1]{\SEX{Exit}{#1}}
+
+\newcommand{\SQE}[2]{\SQEX{Entry}{#2}{#1}}
+
+\newcommand{\SQX}[2]{\SQEX{Exit}{#2}{#1}}
+
+\newcommand{\AC}[1]{
+\begin{description}
+\item[Action]\mbox{}\\
+#1
+\end{description}
+}
+
+\newcommand{\AL}[1]{
+\begin{tabbing}
+mmmmmmmm\=mmm\=mmm\=mmm\=mmm\=mmm\=mmm\=mmm\=\kill
+{\bf Algorithm:}\>
+\+
+#1\\
+\end{tabbing}
+}
+
+\begin{document}
+
+{\Large The Estelle E-Code}
+
+\section{The Stack}
+
+The E-Code machine uses an array of 16-bit integers
+called the code store, which holds the program code (of
+fixed length). Each process is also allocated a stack
+(also an array of 16-bit integers). Each stack begins at
+address 1 and grows upwards.
+
+Three index registers are used to access the stack:
+
+\begin{itemize}
+\item {\em p} -- (program) address of current instruction
+\item {\em b} -- (base) start of stack (current activation)
+\item {\em s} -- (stack) current stack pointer
+\end{itemize}
+
+Each process has its own {\em p}, {\em b} and {\em s} registers.
+
+Initially the stack is empty. When execution begins,
+space is allocated on the stack for the exported
+variables, parameters, and variables defined in the
+process. The exported variables occur first, then the
+parameters, followed by a dummy activation record (see
+below), and then the variables.
+
+When the program activates a procedure, space is
+allocated in an activation record; this is freed up on
+exit from the procedure. Activation records consist of:
+
+\begin{itemize}
+\item Parameters
+\item Context (static link, dynamic link, return address)
+\item Variables
+\item Temporary scratch area
+\end{itemize}
+
+The first three parts are of fixed length and are created
+when the procedure is activated. The temporary part holds
+operands and results during the execution of statements.
+It is empty at the beginning and end of every statement.
+The {\em b} register contains the address of the static link.
+This is called the base address of the activation record.
+Accesses to variables and parameters is done by using (positive and
+negative) displacements from the {\em b} register.
+
+The dynamic link of an activation record contains the
+base address of the previous activation record. When a
+procedure terminates, the dynamic link stored in the
+current activation record is assigned to the {\em b} register.
+These links represent the dynamic sequence in which
+blocks are activated.
+
+The static links define the set of variables that are
+accessible within the current block (the current
+context). These links represent the static block
+structure of the program text.
+
+To access a variable or parameter, we need to know the
+activation record and displacement. To aid this, the
+compiler assigns a level number to each block in a
+program. During code generation, the compiler assigns a
+level number and displacement to each variable. The
+relative level of a block is the number of static links
+that must be followed to reach a variable. Relative level
+0 is the current activation record.
+
+Accesses to variables, parameters, etc, are handled by
+instructions which calculate the address of the variable
+as an offset in the stack. A reference to an exported
+variable of a child process results in a negative
+address. By examining the address, a process can tell
+whether the variable exists on its own stack, or the
+stack of a child. In the latter case, the index of the
+child process will have been pushed on to the stack as
+well, so this can be popped, the correct child stack
+identified, and the variable accessed (after first making
+the address positive).
+
+The use of negative addresses for exported variables is
+an elegant solution to a complex problem, but has a side
+effect - the address 0 can never be used. For this
+reason, stack addressing starts at address 1. However,
+this has an advantage, as it allows easy checking for
+null pointer assignments - any attempt to access address
+0 is an error.
+
+We now turn to the instructions used in the program code.
+We will first examine the Pascal P-code subset, and then
+look at the extended E-code instructions. Throughout the
+description, we assume that:
+
+\begin{tabbing}
+mmm\=cccccccccccccccc\=ccccccccccccccccc\=\+\kill
+{\bf push(v)}\>{\em is the same as}\>{\bf stack[++s] = v}\\
+{\bf pop(v)}\>{\em is the same as}\>{\bf v = stack[s--]}\\
+{\bf chain(level,x)}\>{\em is the same as}\>{\bf x=b; while (level--)
+x=stack[x]}\\
+\end{tabbing}
+
+Note that the P-code is not any particular standard; it
+is adapted from the P-code used by Per Brinch-Hansen in
+`Brinch-Hansen on Pascal Compilers'.
+
+The format used in describing the operations is to give the stack
+entry and exit states, where important, followed by an informal
+description of the action of the instruction, and a pseudo-code
+algorithm for the instruction. As we progress, less algorithms will
+be given, as they will be assumed to be self-evident except in
+complex cases (although in some complex cases, particularly the
+E-Code instructions, algorithms are not given as they depend too much
+on internal implementation details for processes, transitions, etc).
+Sometimes several instructions are grouped together;
+an algorithm is then given which is representative of all those in
+the group. The stack states only show information which is
+relevant to and altered by the instruction - it is assumed that
+everything below this information remains unchanged.
+
+\section{The Pascal P-Code Subset}
+
+\subsection{Variable(Relative Level, Displacement)}
+\SX{Absolute Address of Variable}
+\AC{Used to access value parameters and local
+variables. Compute the absolute address of a
+variable and place it on the stack. This is done
+by traversing the specified number of levels of
+the static chain, obtaining the relative base
+address, adding the displacement, and pushing the
+result on to the stack.}
+\AL{void variable(level,displ)\\
+\{\\
+\>chain(level,x);\\
+\>push(x+displ);\\
+\>p += 3;\\
+\}}
+
+\subsection{VarParam(Relative Level, Displacement)}
+\SX{Address of variable bound to Parameter}
+\AC{Used to access variable parameters. Variable
+parameters are implemented by storing the address
+of the bound variable as the value of the
+parameter. Thus, to access the address of a
+variable parameter, we need to find the address of
+the parameter, and push its value (the address of
+the bound variable) onto the stack. This is a
+minor modification of the action of Variable.}
+\AL{void VarParam(level, displ)\\
+\{\\
+\>chain(level,x);\\
+\>push(stack[x+displ]);\\
+\>p += 3;\\
+\}}
+
+\subsection{Index(Lower, Upper, Element size)}
+\SE{ Array Index Value\\Base Address of Array}
+\SX{Base Address + (EltSize * IndexValue)}
+\AC{Used to access array elements. Removes an index
+value from the top of the stack, checks that it is
+in the specified range (if not, reports an error),
+and increments the address value on the top of the
+stack by the index value multiplied by the element
+size; ie, the address of the indexed element. The
+index must be checked for sign; if it is negative,
+it represents a child's exported array. In this
+case, the final address pushed must also be
+negative.}
+\AL{void Index(Lower, Upper, EltSize)\\
+\{\\
+\>exported = FALSE;\\
+\>pop(ix);\\
+\>if (ix$<$0) \{ exported = TRUE; ix = --ix; \}\\
+\>if (ix$<$Lower {\tt ||} ix$>$Upper) Error;\\
+\>else stack[s] += (ix--Lower)*EltSize;\\
+\>if (exported) stack[s] = --stack[s];\\
+\>p += 5;\\
+\}}
+
+\subsection{Field(Displ)}
+\SE{Base Address of Record}
+\SX{Base Address + Field Displacement}
+\AC{Used to access fields of records. Adds the
+specified field displacement to the address on top
+of the stack. If the base address is negative, the
+record is a child's exported record.}
+\AL{void Field(Displ)\\
+\{\\
+\>if (stack[s]$<$0) stack[s] --= Displ;\\
+\>else stack[s] += Displ;\\
+\>p += 2;\\
+\}}
+
+\subsection{Constant(Value)}
+\SX{Constant Value}
+\AC{Pushes a constant value on to the stack.}
+\AL{void Constant(Value)\\
+\{\\
+\>push(Value);\\
+\>p += 2;\\
+\}}
+
+\subsection{Value(Length)}
+\SE{Address of Variable\\{[Child number]}}
+\SX{Value of Variable}
+\AC{Used to access the value of a variable. Pops the
+address on the top of the stack and pushes the
+value held at that address (the number of words to
+push is specified by the Length).}
+\AL{void Value(Length)\\
+\{\\
+\>pop(address);\\
+\>if (address$<$0)\\
+\>\>\{\\
+\>\>pop(child);\\
+\>\>select child's stack;\\
+\>\>address = --address;\\
+\>\>\}\\
+\>while (Length--\.--)\\
+\>push(stack[address++]);\\
+\>p += 2;\\
+\}}
+
+\subsection{Not(), Minus(), Abs(), Sqr(), Odd()}
+\SE{Value}
+\SX{Result of performing unary op on value}
+\AC{Negates the (Boolean or Integer) value,
+calculates the absolute value, calculates the
+square root, or returns a Boolean 1 if the value is odd,
+0 otherwise, respectively.}
+\AL{void Not(void)\\
+\{\\
+\>stack[s] = !stack[s];\\
+\>p++;\\
+\}}
+
+\subsection{Multiply(), Div(), Modulo(), Add(), Subtract(), And(),
+Or()}
+\SE{Value2\\Value1}
+\SX{Value1 {\em op} Value2}
+\AC{Multiplies (etc) the top two elements of the
+stack, and replace them with the result.}
+\AL{void Multiply(void)\\
+\{\\
+\>pop(val);\\
+\>stack[s] *= val;\\
+\>p++;\\
+\}}
+
+\subsection{Less(), Equal(), Greater(), NotGreater(), NotEqual(),
+NotLess()}
+\SE{Value2\\Value1}
+\SX{Value1 {\em relop} Value2}
+\AC{Replaces the top two values on the stack with a
+Boolean TRUE if the first value is less (etc) than
+the second one; otherwise FALSE.}
+\AL{void Less(void)\\
+\{\\
+\>pop(val);\\
+\>stack[s] = (stack[s] $<$ val);\\
+\>p++;\\
+\}}
+
+\subsection{Assign(Length)}
+\SE{Value to Assign\\Address to Assign to\\{[Child number]}}
+\SX{}
+\AC{Removes the value on the top of the stack, the
+address below it, and assign the value to the
+address.}
+\AL{void Assign(Length)\\
+\{\\
+\>s --= length;\\
+\>pop(rvalue);\\
+\>lvalue = s+2;\\
+\>if (rvalue$<$0)\\
+\>\>\{\\
+\>\>rvalue = --rvalue;\\
+\>\>pop(child);\\
+\>\>deststack = child stack;\\
+\>\>\}\\
+\>else deststack = stack;\\
+\>while (Length--\.--)\\
+\>deststack[rvalue++] = stack[lvalue++];\\
+\>p += 2;\\
+\}}
+
+\subsection{Goto(Displ)}
+\AC{Increment the p register by the displacement.}
+\AL{void Goto(Displ)\\
+\{\\
+\>p += Displ;\\
+\}}
+
+\subsection{Do(Displ)}
+\SE{Boolean Value}
+\SX{}
+\AC{Either proceed to the next instruction or jump to
+another instruction, depending on the value on the
+top of the stack (which is removed).}
+\AL{void Do(Displ)\\
+\{\\
+\>if (pop()) p+=2;\\
+\>else p+= Displ;\\
+\}}
+
+\subsection{For(Displ, Mode)}
+\SE{End Value\\Start Value\\Address of Control Variable}
+\SQX{loop unfinished}{End Value\\Address of Control Variable}
+\SQX{loop finished}{}
+\AC{Initialise a loop control variable with a start
+value, compare it to an end value, and if the loop
+is over, jump out using a displacement. Otherwise
+push the address and end value back on to the
+stack for use by the Next instruction. The Step
+field is the STEP size, adjusted to be positive
+(TO) or negative (DOWNTO).}
+\AL{void For(Displ, Step)\\
+\{\\
+\>pop(end);\\
+\>pop(start);\\
+\>pop(address);\\
+\>stack[address] = start;\\
+\>if (Step*start $>$ Step*end)\\
+\>p += Displ;\\
+\>else \{\\
+\>\>push(address);\\
+\>\>push(end);\\
+\>\>p+=3;\\
+\>\>\}\\
+\}}
+
+\subsection{Next(Displ, Mode)}
+\SE{End Value\\Address of Control Variable}
+\SQX{loop unfinished}{End Value\\Address of Control Variable}
+\SQX{loop finished}{}
+\AC{Check whether or not a FOR loop is complete. If
+not, leave stack as it was and bramnch back using
+the Displ. If it is, leave stack clear and drop
+through to next instruction. See also For.}
+\AL{void Next(Displ, Step)\\
+\{\\
+\>pop(end);\\
+\>pop(address);\\
+\>stack[address]+=Step;\\
+\>if (Step$>$0 \&\& stack[addr]$<$end) or\\
+\>\>(Step$<$0 \&\& stack[addr]$>$end)\\
+\>\>\{\\
+\>\>push(address);\\
+\>\>push(end);\\
+\>\>p += Displ;\\
+\>\>\}\\
+\>else p+= 3;\\
+\}}
+
+\subsection{ProcCall(Level, Displ, ReturnLen)}
+\SX{Return Address\\Dynamic Link\\Static Link}
+\AC{Creates the context part of an activation record,
+and jumps to the procedure code.}
+\AL{void ProcCall(Level, Displ, ReturnLen)\\
+\{\\
+\>chain(Level,x);\\
+\>s += ReturnLen;\\
+\>push(x); /* static link */\\
+\>push(b); /* dynamic link */\\
+\>push(p+3); /* return address */\\
+\>b = s--2;\\
+\>p += Displ;\\
+\}}
+
+\subsection{Procedure(VarLength, TempLength, Displ)}
+\SX{Last Word of Local Variable Space\\Local Variable Space}
+\AC{Allocates space on the stack for a procedures
+variables, ensures that there is sufficient space
+remaining for the temporaries, and branches to the
+statement part of the procedure.}
+\AL{void Procedure(VarLen, TmpLen, Displ)\\
+\{\\
+\>if ((s+VarLen+TmpLen)$>$stacksize) expand stack;\\
+\>s += VarLen;\\
+\>p+= Displ;\\
+\}}
+
+
+\subsection{EndProc(ParamLength, ReturnLen)}
+\SE{ Last Word of Local Variable Space\\Local Variable Space\\
+Activation Record\\{[Return Value]}\\Parameters}
+\SX{[Return Value]}
+\AC{Uses the dynamic link to remove the activation
+record of the procedure and jump to the return
+address, and pushes the return value, if any.}
+\AL{void EndProc(ParamLen)\\
+\{\\
+\>s = b+2; /* pop variables */\\
+\>ReturnValTop = b--1;\\
+\>pop(p);\\
+\>pop(b);\\
+\>pop();\\
+\>s --= ParamLen+ReturnLen;\\
+\>while (ReturnLen--\.--)\\
+\>\>push(stack[ReturnVarTop--ReturnLen]);\\
+\}}
+
+\subsection{ReadStr(Length), ReadCh(), ReadInt()}
+\SE{Address to Read to\\{[Child number]}}
+\SX{}
+\AC{Input a string, character or integer and assign
+it to the address on the top of the stack. System
+dependent!}
+\AL{void ReadStr(Length)\\
+\{\\
+\>Read string from keyboard;\\
+\>pop(address);\\
+\>if (address$<$0)\\
+\>\>\{\\
+\>\>address = --address;\\
+\>\>pop(child);\\
+\>\>select child's stack;\\
+\>\>\}\\
+\>while (Length--\.--)\\
+\>\>stack[address++] = next character of string;\\
+\>p+=2;\\
+\}\\
+\\
+void ReadInt() /* ReadCh similar */\\
+\{\\
+\>Read integer from keyboard;\\
+\>pop(address);\\
+\>if (address$<$0)\\
+\>\>\{\\
+\>\>address = --address;\\
+\>\>pop(child);\\
+\>\>select child's stack;\\
+\>\>\}\\
+\>stack[address] = integer;\\
+\>p++;\\
+\}}
+
+
+\subsection{WriteStr(Length), WriteCh(), WriteInt()}
+\SE{Value to Write}
+\SX{}
+\AC{Outputs the value on the top of the stack. System
+Dependent!}
+\AL{void WriteStr(Length)\\
+\{\\
+\>s --= Length;\\
+\>Output Length characters from stack[s+1] on.\\
+\>p+=2;\\
+\}\\
+\\
+void WriteInt(void) /* WriteCh is similar */\\
+\{\\
+\>pop(value);\\
+\>Output value as an integer;\\
+\>p++;\\
+\}}
+
+\subsection{EndWrite()}
+\AC{Indicates the end of a WRITE or WRITELN
+statement. The action is system-dependent; in the
+PEW this results in the I/O window popping up and
+being displayed for one second.}
+
+\subsection{DefArg(Label,Value)}
+\AC{Inform the linker of the actual value of a
+symbolic label, ie L[Label] = Value. These
+instructions are removed from the code output by
+the linker.}
+
+\subsection{DefAddr(Label)}
+\AC{Inform the linker of the actual address of a
+symbolic label, ie L[label] = current address.
+These instructions are removed from the code
+output by the linker.}
+
+\subsection{AddSetElement()}
+\SE{Element Number (0\dots 63)\\Set Value (4 words)}
+\SX{New Set Value (4 words)}
+\AC{The specified element is added to the set. Sets
+are represented using 64-bits (ie, four 16-bit
+words), and the element number is a value in the
+range 0\dots 63. This specified bit is set in the set
+value.}
+\AL{void AddSetElement(void)\\
+\{\\
+\>pop(elt);\\
+\>word = elt/16;\\
+\>bit = elt\%16;\\
+\>stack[s--word] {\tt |}= 1$<<$bit;\\
+\>p++;\\
+\}}
+
+
+\subsection{AddSetRange()}
+\SE{Range End (0\dots 63)\\Range Start (0\dots 63)\\Set Value (4 words)}
+\SX{New Set Value (4 words)}
+\AC{All bits in the specified range are set. See
+AddSetElement (41) for information on the
+representation of sets.}
+\AL{void AddSetRange(void)\\
+\{\\
+\>pop(end);\\
+\>pop(start);\\
+\>while (start$<$=end)\\
+\>\>\{\\
+\>\>word = elt/16;\\
+\>\>bit = elt\%16;\\
+\>\>stack[s--word] {\tt |}= 1$<<$bit;\\
+\>\>start++;\\
+\>\>\}\\
+\>p++;\\
+\}}
+
+\subsection{In()}
+\SE{Stack Value (4 words)\\Element Number (0\dots 63)}
+\SX{Boolean result}
+\AC{If the specified bit is set in the set value,
+push 1 on to the stack, else push 0 on to the
+stack.}
+\AL{void In(void)\\
+\{\\
+\>s --= 4;\\
+\>pop(elt);\\
+\>word = elt/16;\\
+\>bit = elt\%16;\\
+\>if (stack[s+5--word] \&\& (1$<<$bit)) push(1);\\
+\>else push(0);\\
+\>p++;\\
+\}}
+
+\subsection{SetAssign()}
+\SE{Stack Value (4 words)\\Destination address\\{[Child number]}}
+\SX{}
+\AC{Assigns the four words holding the set value to
+the four words starting at the specified
+destination address. If the destination address is
+negative, the variable is a child's exported
+variable, so the child number is used to determine
+which child stack to use.}
+\AL{void SetAssign(void)\\
+\{\\
+\>dest = stack[s--4];\\
+\>source = s--4;\\
+\>if (dest$>=$0) deststack = current stack;\\
+\>else \{\\
+\>\>pop(child);\\
+\>\>deststack = child's stack;\\
+\>\>\}\\
+\>while (source!=s)\\
+\>\>deststack[dest++] = stack[source++];\\
+\>s --= 5;\\
+\>p++;\\
+\}}
+
+\subsection{SetEqual()}
+\SE{Set1 (4 words)\\Set2 (4 words)}
+\SX{Boolean value}
+\AC{Pushes 1 on the stack if the two sets are
+identical.}
+\subsection{SetInclusion, SetInclusionToo}
+\SE{Set1 (4 words)\\Set2 (4 words)}
+\SX{Boolean value}
+\AC{Pushes 1 on the stack, if Set2 is a subset of Set1
+(SetInclusion), or Set1 is a subset of Set2 (SetInclusionToo),
+else pushes 0.}
+
+\subsection{Intersection(), Union(), Difference()}
+\SE{Set1 (4 words)\\Set2(4 words)}
+\SX{Result Set (4 words)}
+\AC{Computes the union, intersection or difference (Set2--Set1) of two
+sets, and leaves the result on the stack.}
+
+\subsection{StringEqual(Len), StringGreater(Len), StringLess(Len),
+StringNotEqual(Len), StringNotGreater(Len), StringNotLess(Len)}
+\SE{String1 (of length `Len')\\String2 (of length `Len')}
+\SX{Boolean value}
+\AC{Pushes a 1 on to the stack if String2 satisfies the specified
+relationship with String1, else pushes 0. For example, if String1 is
+gretaer than String2, then StringLess would push 1. `Len' specifies
+the length of the strings.}
+
+\subsection{IndexedJump(Offset)}
+\AC{This is used for CASE statements. It should be followed by a
+number of GOTO instructions, which correspond to the different cases.
+The offset is popped, multiplied by 2 (the size of a GOTO
+instruction), and added to the p register to get the new instruction,
+which should be a GOTO.}
+
+\subsection{Case()}
+\AC{Generates a run-time error. This instruction is used to signal
+the end of a case statement, and corresponds to the situation where
+the case expression has no corresponding label.}
+
+\subsection{Copy()}
+\SE{Value}
+\SX{Value\\Value}
+\AC{Copy duplicates the value on the top of the stack.}
+
+\subsection{Pop()}
+\SE{Value}
+\SX{}
+\AC{Pop the value from the top of the stack.}
+
+\subsection{New(Numwords)}
+\SX{Address of Allocated Block}
+\AC{Attempts to find an unallocated block of memory on the heap (free
+stack space) of the specified number of words. In the {\em PEW}, if such
+a block is
+found, it is linked in to a chain of allocated blocks, and the
+address is pushed on to the stack. If the allocation is not possible,
+a run-time error occurs. The use of a chain of allocated blocks is
+inefficient - it would be better to use a chain of free blocks;
+however, such details are implementation dependent. If the New
+instruction is the first such instruction to be executed by the
+containing process, its stack is expanded before allocation. Once a
+New has occurred, a process' stack is fixed in size and cannot be
+re-expanded.}
+
+\subsection{Dispose()}
+\SE{Address of Allocated Block}
+\SX{}
+\AC{Locates the allocated block on the chain of allocated blocks (see
+`New'), and removes it from the chain. If no corresponsing block is
+found, a run-time error occurs.}
+
+\subsection{EnterBlock(Stack Space)}
+\AC{Specifies the minimum amount of stack space that is required to
+execute the block about to be entered. A check is performed to see if
+the stack has sufficient free space, and if not, an attempt is made
+to expand the stack. If this fails, a run-time error is reported.}
+
+\subsection{Newline(Linenum)}
+\AC{Used to synchronise the E-Code with the original Estelle source
+code.}
+
+\subsection{Random()}
+\SE{Range of Random Numbers}
+\SX{Random Number}
+\AC{Pops the Range value off the stack, generates a
+random number between {\em 0} and {\em Range--1} inclusive, and push
+this value on the stack.}
+
+\subsection{Range(Minimum, Maximum)}
+\SE{Value}
+\SX{Value}
+\AC{Checks that the value on the top of the stack is
+in the specified range; if not, generates a run-time
+error.}
+
+\subsection{ReturnVar(Displ)}
+\SE{}
+\SX{Address of Variable}
+\AC{Adds the displacement to the activation record
+base address to get the return variable address, and
+pushes this on to the stack.}
+
+\subsection{Scope(Level,Offset)}
+\AC{Used to keep track of symbol table scope. The parameters are the
+scope level, and offset into the symbol table storage area of the
+first symbol table entry at this level. This is highly implementation
+dependent.}
+
+\subsection{With()}
+\SE{}
+\SX{Activation Record for WITH statement}
+\AC{Used to identify the new scope level of a WITH statement. It
+simply pushes a new activation record on to the stack.}
+
+\subsection{WithField(Field Offset, With Level)}
+\SE{}
+\SX{Address of Field}
+\AC{References to fields within WITH statements cause this
+instruction to be generated. The With Level is the number of
+activation records to be traversed to get to the record address
+associated with the field, while the Field Offset is the offset of
+the field within that record.}
+\AL{void WithField(FieldOffset, WithLevel)\\
+\{\\
+\>chain(WithLevel,addr);\\
+\>recaddr = stack[addr--1];\\
+\>if (recaddr$<$0) fldaddr = recaddr -- FieldOffset;\\
+\>else fldaddr = recaddr + FieldOffset;\\
+\>push(fldaddr);\\
+\}}
+
+\subsection{EndWith(Numlevels)}
+\AC{Pops the specified number of activation records off the stack
+(each record in the list of a WITH statement causes an activation
+record to be pushed on to the stack, {\bf preceded} by the address of
+the record being specified), and then pops the address of the first
+record.}
+
+\section{E-Code extensions to P-Code}
+
+\subsection{NumChildren()}
+\SX{Number of Module Variables}
+\AC{Pushes the number of module variables that the currently executing
+process has on to the stack.}
+
+\subsection{GlobalTime()}
+\SX{Current Time}
+\AC{Pushes the current simulation time on to the stack. WARNING - the
+time is pushed as a 16-bit word, whereas times are actually
+represented in the {\em PEW} as 32-bits. Truncation is thus a very
+real possibility.}
+
+\subsection{FireCount()}
+\SX{Number of Executions}
+\AC{Pushes the number of times the currently executing transition has
+been executed on to the stack.}
+
+\subsection{QLength()}
+\SE{IP Index\\IP Identifier}
+\SX{IP Queue Length}
+\AC{Pushes the length of the reception queue associated with the
+specified IP on to the stack. The IP Identifier is not used, but is
+generated by the compiler for IP references anyway, so it is simply
+discarded.}
+
+\subsection{SetOutput(Directive Value)}
+\AC{Implements the {\em PEW} compiler directive for controlling the
+destination of output due to WRITE and WRITELN procedure calls.}
+
+\subsection{Domain(Numvars)}
+\SE{}
+\SX{Activation Record\\Space for Domain Variables}
+\AC{Used for EXIST, FORONE and FORALL constructs in Estelle. It
+allocates space on the stack for the specified number of domain variables,
+and then pushes a new activation record.}
+
+\subsection{EndDomain(NumVars)}
+\SE{Result\\Activation Record\\Domain Variables}
+\SX{Result}
+\AC{Identifies the end of a EXIST, FORONE or FORALL Estelle
+construct. The result is popped off the stack, the activation record
+popped, the domain variables released, and the result pushed back on
+to the stack.}
+
+\subsection{ExistMod(Header Ident, Offset to Failure Code)}
+\SE{\dots\\Domain Activation Record\\Module Domain Variable}
+\SX{\dots\\Domain Activation Record\\Module Domain Variable}
+\AC{Checks whether the child process identified by the module domain
+variable has the specified header identifier. If it does, control
+falls through to the next statement. If not, control passes to the
+failure code. This is used for domain constructs (EXIST, FORONE,
+FORALL), where the domain type is a module domain. For example, to
+execute an EXIST factor, the module domain variable is iterated from
+0 through to {\em numchildren--1}, and ExistMod is executed for each
+value, until all values are exausted, or a successful value is found.}
+
+\subsection{ExpVar(Level,Displacement)}
+\SE{Child Number}
+\SX{Exported Variable Address\\Child Number}
+\AC{Specifies a reference to an exported variable - the alter-ego of
+the Variable instruction. The activation chain is traversed on the
+{\em child's} stack to find the address.}
+\AL{void ExpVar(Level,Displ)\\
+\{\\
+\>pop(childnum);\\
+\>select child's stack;\\
+\>chain(Level,x);\\
+\>select parent's stack;\\
+\>push(childnum);\\
+\>push(--x--Displ);
+\}}
+
+\subsection{DefIPs(Start,Size)}
+\AC{Used to specify which IP's share a common reception queue. The
+linker rearranges the E-Code so that all DefIPs instructiosn for a
+process occur contiguously. This block of instructions is then
+processed when a module is created. The parameters specify the start
+index of the set of IPs, and the number of IPs in the set. For
+example, if a process has 7 IPs, and of these the 3rd, 4th and 6th
+share a common reception queue, two instructions would be generated,
+namely DEFIPS(4,2) and DEFIPS(7,1) (the numbering of IPs begins with
+0).}
+
+\subsection{Attach()}
+\SE{Child IP Index\\Child IP Identifier\\Child Index\\
+Parent IP Index\\Parent IP Identifier}
+\SX{}
+\AC{Attaches the child external IP to the parent IP. Any interactions
+queued at the parent IP are prepended onto the queue associated with
+the {\em downattach} of the child IP. For details on the semantics of
+Attach, refer to the Estelle literature. This instruction corresponds
+exactly to the high level ATTACH instruction in its effects.}
+
+\subsection{Connect(IsInternal1, IsInternal2)}
+\SE{IP Index1\\IP Ident1\\{[ModVar Index1 if IP1 is external]}\\IP Index2\\
+IP Ident2\\{[Modvar Index2 if IP2 is external]}}
+\SX{}
+\AC{Connect the two specified interaction points. The
+indices of the interaction points are on the stack. If
+either or both of the interaction points are not internal
+(ie, they are child external), then the index of the
+appropriate child module variable must also be on the
+stack.}
+
+\subsection{Output(Length of Arguments, Reliability)}
+\SE{[Interaction Arguments]\\Interaction Length\\Interaction
+Identifier\\IP Index\\IP Identifier}
+\SX{}
+\AC{Pops and saves the Interaction Arguments, creates
+a new interaction with these saved arguments and the
+other parameters on the stack, timestamps the
+interaction, and enqueues it on the appropriate queue
+specified by the Interaction Point Index. The reliability is used to
+randomly determine whether it should actually be output, or whether
+it should be lost.}
+
+\subsection{Detach(Mode)}
+\SQE{if Mode is 0}{IP Index\\IP Identifier}
+\SQE{if Mode is 1}{IP Index\\Child Index\\IP Identifier}
+\SQE{if Mode is 2}{Child Index}
+\SX{}
+\AC{The Mode specifies whether all child external IPs of a specified
+child are to be detached (mode 2), a specific child external IP is to
+be detached (mode 1), or a specific IP belonging to the current
+process is to be detached (mode 0). The IP Identifier is not used in
+any case, but is discarded if present. The appropriate module
+(current or child) is selected, and attachments of IPs for that
+module are broken - either a single specific attachment, or all
+attachments (mode 2). Interactions that arrived through the higher IP
+are removed from the {\em downattach} of the lower IP and returned to
+the queue of the higher IP.}
+
+\subsection{Disconnect(Mode)}
+\SQE{if Mode is 0}{IP Index\\IP Identifier}
+\SQE{if Mode is 1}{IP Index\\Child Index\\IP Identifier}
+\SQE{if Mode is 2}{Child Index}
+\SX{}
+\AC{The Mode is as for Detach. This instruction is very similar to
+Detach, except that no interactions are moved.}
+
+\subsection{Module(Body Identifier,Header Identifier, Class,
+Variable Space, Number of Module Variables,
+Number of Initialisation Transitions, Number of Body Transitions,
+Number of Internal IPs, Number of External IPs, Offset to first
+Initialisation Transition, Offset to first Body Transition, Offset to
+DefIP instructions, Offset to Scope instructions)}
+\AC{This is the instruction that initialises modules. Together with
+TRANS, it is the modt complex instruction in the instruction set.
+
+Various data structures for the new process are created, including a
+module variable table, transition table, IP table, and stack. Reception
+queues for the IPs are alloacted, with the DefIPs instructions being
+processed to determine which IP table entries share the same
+reception queue. If the Offset to DefIPs instructions has the value
+--1, there are no common queues.
+
+A scope table is allocated for the module, and the Scope instructions
+are processed to load up this table.
+
+The initialisation parameters are popped off the parent stack (see
+Init) and pushed on to the new stack. Space is reserved for the
+exported variables, an activation record is created, and then space
+is reserved for the (non-exported) variables.
+
+If the module has initialisation transitions, one of these is
+selected for execution and executed. Finally, the parent process is
+reactivated, and execution continues from the parents Init
+instruction.}
+
+\subsection{Init(Displacement to Module instruction, ParamLen)}
+\SE{[Initialisation Parameters]\\Module Variable Index}
+\SX{}
+\AC{Creates a new module instance, using the module
+body definition at the specified address (see Module), and assigns the
+new module instance to the specified module variable.}
+
+\subsection{Release()}
+\SE{Child Number}
+\SX{}
+\AC{The specified child process and all its children are killed.
+Before releasing the process, all its external interaction points are
+disconnected and/or detached. Any module variables of the current
+process that referred to the released process are made undefined.
+
+Additional processing that occurs in the PEW is for all breakpoints
+that refer to the released process or its children only are cleared
+(not yet implemented), and the execution summary statistics for the
+process and its children are written to the log file.}
+
+\subsection{Terminate()}
+\SE{Child Number}
+\SX{}
+\AC{Terminate is a simple form of Release. The only difference is
+that external IPs of the terminated process that are attached at the
+time of termination are detached using a form of detach known as {\em
+simpledetach}. Unlike detach, a simpledetach does not result in any
+interactions being moved.}
+
+\subsection{ModuleAssign()}
+\SE{Source Module Variable Number\\Destination Module Variable
+Identifier\\Destination Module Variable Number}
+\SX{}
+\AC{Assigns the destination module variable to have the same value as
+the source. The identifier is used in the {\em PEW} for symbolic support
+by the process browser.}
+
+\subsection{Delay(Type)}
+\SE{Minimum Delay\\Maximum Delay}
+\SX{Boolean Value}
+\AC{Compares the length of time that the transition
+has been enabled (call this {\em etime} with the Maximum
+Delay. If the etime exceeds the maximum delay, TRUE is pushed on to the
+stack. If the etime is less than the Minimum Delay, FALSE
+is pushed on to the stack. If the etime falls between
+the minimum and maximum delay times, a random delay in the interval
+is chosen (according to the specified distribution), and if this is
+less than the etime TRUE is pushed, else FALSE is pushed. The {\em
+PEW} also keeps track of the shortest delay over all DELAY clauses in
+a specification, and if no transitions
+are enabled but the system has not deadlocked, the global time is
+updated by this shortest delay.
+
+The Type parameter specifies the distribution type for random delays -
+if the type is 0 then a uniform distribution is used; if the type is 
+negative a Poisson distribution (with --Type as the mean value) is used;
+otherwise an exponential distribution with Type as the mean value is
+used.}
+
+\subsection{When(Interaction Identifier, Interaction Length}
+\SE{IP Offset}
+\SX{Value}
+\AC{The identifier of the interaction at the head of the specified IP
+is compared with the Interaction Identifier argument. If they are
+identical, and the destination IP of the head interaction is indeed
+the specified IP (this check is necessary because of common queues)
+then (IP Offset + 1) is pushed on to the stack, else 0 is
+pushed on to the stack. The +1 is necessary to ensure a non-zero
+value, as IP Offsets begin at zero. The `len' parameter is not used,
+and will be removed in the future.}
+
+\subsection{Otherwise(First,Last)}
+\SE{}
+\SX{Boolean Value}
+\AC{This instruction implements the PROVIDED OTHERWISE construct. The
+parameters First and Last specify the range of transitions whose
+PROVIDED clauses must all have failed for the PROVIDED OTHERWISE
+clause to succeed. As the transitions in the range must all precede
+the transition containing the PROVIDED OTHERWISE clause, the state of
+their provided clauses is known by the time this instruction
+executes.}
+
+\subsection{Trans(Name, FromStates, From Identifier, ToState, To
+Identifier, Priority, Offset to Provided Clause, Offset to When
+Clause, Offset to Delay Clause, Offset to next Trans instruction,
+Length of When Interaction, Size of Variable Space, Size of Temporary
+Space, Offset to Transition Block)}
+\AC{This instruction, like Module, is not really `executed', as such,
+but is used to impart information to the interpreter about a
+transition. The first time that the scheduler examines the
+containing process, the identifiers, name, and priority are all
+entered into the transition table entry for the transition. The
+scheduler will also use the Trans instruction each time to locate the
+clauses of the transition, and if the transition is selected for
+execution, to locate its body. The Variable and Temporary Space
+arguments are used to check for potential stack overflow before
+executing a transition.}
+
+\subsection{EndTrans()}
+\AC{Indicates the end of a transition block. No
+action is taken.}
+
+\section{P-Code Optimisations}
+
+Some of the P-Code instructions are optimised forms of common P-Code
+instruction pairs. These are:
+\begin{tabbing}
+cccc\=ccccccccccccccccccccc\=\+\kill
+{\em Instruction:}\>{\em is equivalent to:}\\
+LocalVar(Displ)\>Variable(0,Displ)\\
+LocalValue(Displ)\>Variable(0, Displ); Value(1)\\
+GlobalVar(Displ)\>Variable(1,Displ)\\
+GlobalValue(Displ)\>Variable(1,Displ); Value(1)\\
+SimpleValue\>Value(1)\\
+SimpleAssign\>Assign(1)\\
+GlobalCall(Displ)\>ProcCall(1,Displ)\\
+\end{tabbing}
+
+Furthermore, a sequence:
+\begin{verse}
+{\bf Variable(Level, VDispl)}\\
+{\bf Field(FDispl)}
+\end{verse}
+can be replaced by the single instruction:
+\begin{verse}
+{\bf Variable(Level, VDispl+FDispl)}
+\end{verse}
+
+\section{The Scheduler}
+
+This is the heart of the interpreter. It is an `infinite' loop, which
+successively executes the following steps:
+\begin{enumerate}
+\item{Calculate, recursively, for all processes in the process tree,
+the state of each clause of each transition of each process. Keep
+track of the smallest positive delay of all transitions that are only
+disabled due to their delay clauses failing.}
+\item{If no enabled transition were found, update the time by the
+smallest delay found, and start again.}
+\item{If enabled transitions were found, once again recurse through
+the process tree. If a process has no enabled transitions, recurse
+through its children, else bootom out the recursion process at this
+point (as parent transitions always take priority). If the process
+offers more than one transition to be fired, use the priorities to
+select. If there are transitions that are enabled and have the same
+priorities, select randomly between them.}
+\item{When recursing through children, if the parent is an activity
+or systemactivity, bottom out of the recursion the moment a single
+child has a transition executed. For processes and systemprocesses,
+continue the recursion through all of the children's peers.}
+\item{If no transitions were found, and no delay was found in the
+first step, the system has deadlocked.}
+\end{enumerate}
+\end{document}

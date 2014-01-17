@@ -1,0 +1,1903 @@
+\documentstyle [12pt,A4,lists]{article}
+\begin{document}
+\newpage
+\thispagestyle{empty}
+\setcounter{page}{0}
+\vskip 8em
+\begin {center}
+{\LARGE The Estelle {\em PEW} User Manual}
+\vskip 1em
+{\large for Version 2.1}
+\vskip 3em
+{\large by Graham Wheeler}
+\vskip 3em
+{\large (c) November 1989-1992}
+\vskip 1em
+{\large Graham Wheeler}
+\vskip 3em
+{\large Data Network Architectures Laboratory}
+\vskip 1em
+{\large Department of Computer Science}
+\vskip 1em
+{\large University of Cape Town}
+\vskip 1em
+{\large Private Bag, RONDEBOSCH}
+\vskip 1em
+{\large 7700}
+\vskip 1em
+{\large South Africa}
+\vskip 1em
+{\large Telephone +27.21.650.2662}
+\vskip 1em
+{\large FAX +27.21.650.3726}
+\vskip 1em
+{\large E-Mail gram@cs.uct.ac.za or gram@gramix.aztec.co.za}
+\end{center}
+\newpage
+\tableofcontents
+\newpage
+\pagestyle{plain}
+\section[Preface]{Preface}
+
+This manual is a revision of the Preliminary Version of the {\em PEW}
+user manual which was released with Version 1.0 of the {\em PEW}.
+It has been prepared for the release of Version 2.0 of the {\em PEW}.
+In order to highlight the differences between the versions 1.0,
+1.1, 1.2 and 2.0, the original introduction has been left unmodified.
+Instead, supplementary introductions have been added, for each of the
+successive versions, which summarise changes that have been made.
+If you are already familiar with the {\em PEW}, you may read these
+supplementary introductions immediately; for
+newcomers, they will be more understandable once you have read the
+rest of the manual and worked with the {\em PEW}.
+
+For those who have used the {\em PEW} before, I hope you like the
+changes that have been made, and find them useful.
+
+\newpage
+\section[Introduction to Version 1.0]{Introduction to Version 1.0}
+
+The Estelle  {\em PEW} ({\em P}rotocol {\em E}ngineering {\em
+W}orkstation) is  a tool  for the  development,  testing  and
+simulation of  protocol specifications written using the Estelle
+(Extended  State   Transition   Language)   Formal   Description
+Technique (FDT).  The PEW  provides  an  integrated  environment
+complete with  screen editor,  compiler,  linker,  and  
+debugger/interpreter  all  in  a  single  package. 
+
+The Estelle language was developed by the International Organisation
+for Standardisation (ISO) as one of several techniques for protocol
+specification. The {\em PEW} conforms closely to the Draft
+International Standard DIS 9074, promulgated in July 1987. The major
+restriction of the {\em PEW}'s implementation is the lack of a real
+(that is, floating point) data type.
+
+This document is the first version of the Estelle {\em PEW} User
+Manual. It describes the first general release of the
+{\em PEW}, which is Version 1.0. All previous releases were internal
+to the Department of Computer Science of the University of Cape Town.
+
+The {\em PEW} really began in 1987, when Jaque van Dijk, under the
+supervision of Professor Pieter Kritzinger, developed a compiler for
+Estelle. This compiler was completed in late 1988, at which
+point Graham Wheeler took over the project. Inspired by the `Integrated
+Environment' language development systems being marketed by the
+Borland company (in particular, Borland's TurboC, which was used as
+the development language for the {\em PEW}), Graham decided that
+rather than just developing a stand-alone interpreter for Estelle, an
+integrated development environment would be built.
+
+The first component to be developed was the editor, which was written
+during the early part of 1989. Once this was completed, Graham
+attempted to integrate Jaque's compiler into the editor. The
+obstacles to this proved insurmountable: the compiler had been
+written in Pascal, and was also sufficiently unstable for it to be
+executed indirectly from the editor. In April 1989, Graham wrote a
+Pascal to C translator, and by May had the 6 500 lines of Pascal
+translated to just under 6 000 lines of C. Over the course of 1989
+the compiler was refined, large parts of it were rewritten, and many
+bugs were removed. The final product is a stable compiler which is
+20\% smaller (the executable code is 40\% smaller), and which compiles
+Estelle code at about 5 000 lines per minute (about three times
+faster than the original) - a true demonstration of the power of C!
+
+Hand in hand with the redevelopment of the compiler went the
+development of the interpreter. The compiler generates a (mostly)
+low-level code called E-Code, based on Pascal's P-Code. The demands
+of interpreting Estelle led to several rethinks of aspects of the
+E-Code, which in turn led back to changes in the compiler. The two
+components were thus inseperable in design, although they were kept
+as seperate programs until July 1989 when the first integrated
+version was produced. At this stage the debugger was primarily a
+low-level debugger, allowing examination of the E-Code, stepping
+through E-Code, examination of process's internal stacks, and other
+details which have subsequently been hidden (but not removed).
+
+Version 0.6 of the {\em PEW} was released internally within the 
+Department of Computer Science at U.C.T. in August, which provided
+valuable feedback about the system. Many thanks to the
+senior students in the Department who unwittingly did the Beta
+testing!
+
+The current version of the {\em PEW} incorporates a new user
+interface called the {\em Process Browser}. This is a multi-windowed
+environment which allows the user to constantly view details of the
+current executing process, or to examine other processes freely. This
+environment makes it easy to set breakpoints, view connection
+endpoints of channels, delete interactions from queues, examine the
+Estelle source code, view statistics about the firing of transitions
+and use of channels, and so on. Context-sensitive help is available
+at all times. We believe this user-interface to be one of the most
+exciting features of the {\em PEW}.
+
+The fact that the {\em PEW} gathers execution statistics as it
+operates makes it very easy to use as an execution profiling tool for
+protocol specifications. For example, a user may calculate the
+throughput and error rate of a protocol under various loads very
+quickly and easily, without having to add explicit code to the
+Estelle specification to gather statistics. The {\em PEW} also
+detects and reports deadlock when it occurs, and can tell when there are
+interactions queued which can never be dealt with. It thus aids the
+correctness testing of protocol specifications.
+
+This version of the {\em PEW} was demonstrated at Forte '89.
+The {\em PEW} continues to be developed.
+The next version is scheduled for
+the end of 1990; we hope that we will be able to largely eliminate
+the need for the user to perform multiple executions in order to
+evaluate performance under different conditions. Our aim is to
+incorporate an analytical tool into the {\em PEW} which can generate
+and solve queueing models of protocol specifications.
+
+We hope that you enjoy using the {\em PEW}. If you have any comments
+or suggestions to make, or bugs to report, please make use of the
+evaluation form included in the Appendices and return it to us.
+         
+\section[Introduction to Version 1.1]{Introduction to Version 1.1}
+
+Version 1.1 of the {\em PEW} was released in February 1990. It
+contains a number of changes, which are summarised below:
+\begin{itemize}
+\item A number of bugs have been fixed (of course).
+\item The {\em F10} key is now used to quit the interpreter/debugger,
+and the two different execution modes ({\em Animate} and {\em
+Execute}) have been combined into a single mode serving both
+purposes, assigned to the {\em F9} key.
+\item Three new functions have been added: {\tt QLENGTH}, which
+returns the length of a reception queue when applied to an
+interaction point; {\tt FIRECOUNT}, which returns the number of
+times the containing transition has been fired, and {\tt GLOBALTIME},
+which returns the current (simulation) time.
+\item The arrow on the left of the screen indicating which source line 
+is being executed changes to an `s' when the scheduler is running.
+\item Output procedures WRITE and WRITELN also write to the log file
+if logging is on.
+\item The destination of output from WRITE and WRITELN can be
+controlled using a compiler directive.
+\item The pseudo-random number generator can now be seeded by the user, to
+replicate executions.
+\item Semaphores are used to prevent the interpreter being executed
+during critical sections; previously infinite recursions were
+possible if the interpreter tried to dump statistics to the log
+file when the process tree data structures were in a fluid state.
+\item The process browser windows can now be changed in size (to a
+limited extent) using {\em Shift-F1} and {\em Shift-F2}.
+\item A low-level E-code display can be invoked from the process
+browser with Alt-F10; this is of relevance only to those who are
+interested in the internal implementation of the {\em PEW}.
+\end{itemize}
+
+\section[Introduction to Version 1.2]{Introduction to Version 1.2}
+
+In March 1990, Version 1.2 of the {\em PEW} was completed. The
+enhancements made in this version include:
+\begin{itemize}
+\item Some reachability and deadlock analysis of state transitions and
+interprocess communication has been added.
+\item As a result of the previous change, the compiler can also now
+issue non-fatal warnings.
+\item Pressing {\em F1} or {\em Alt-H} when an error or warning
+window is displayed causes help for that error message to be
+displayed. The help is contained in a plain text file {\tt ERROR.HLP}, 
+which may be modified.
+\item An {\em ANALYZE} menu has been added to the Editor/Compiler.
+This menu allows an independent variable to be specified, together
+with a range through which it should be varied. The {\em PEW} can
+then automatically recompile and reexecute the specification for each
+value of the independent variable (traeting it as a top-level
+{\tt CONSTANT} definition). The user may specify expressions
+to be evaluated and tabulated as a result of this process. This makes
+it easy to produce tables of, for example, throughput and error rate
+of a protocol against timeout.
+\item {\tt ANY} constants are now supported.
+\item The {\tt TERMINATE} statement, a new addition to Estelle, 
+has been implemented.
+\item The syntax of transitions now agrees fully with the standard, and
+nested transitions are now supported.
+\item All forms of the {\tt DETACH} statement are now implemented.
+\item {\tt DELAY} clauses can now have either uniform, Poisson or
+exponential distributions, selected by a compiler directive.
+\item An environment variable, {\tt PEWPATH}, can be set to allow the {\em
+PEW} to find its help files even if run from a different directory.
+\end{itemize}
+
+Thus, apart from the lack of a {\tt REAL} type, the only areas where
+the {\em PEW} is still deficient from the standard is that \dots
+types are still not allowed (and never will be, while the {\em PEW}
+remains execution-oriented); {\tt ANY} constants are handled by
+`cheating' somewhat), and the {\tt ANY} clause is not supported, but
+will be soon (as soon as I can figure out an elegant way of doing it,
+instead of the hack methods that I've thought of so far\dots).
+
+\section[Introduction to Version 2.1]{Introduction to Version 2.1}
+
+Version 2.0 of the {\em PEW} was completed in August 1991, with
+additional changes since then bringing the latest version (May 1992)
+to 2.1. The number of additions is considerable, and includes:
+
+\begin{itemize}
+\item Further compiler directives giving increased control over
+inter-process communication, delays, and I/O;
+\item The system has been split into stand-alone versions of the
+compiler and interpreter, as well as the integrated version. The
+stand-alone components can handle larger specifications;
+\item The stand-alone interpreter can perform a `transition sequence
+analysis' of some systems, and produce a graph specifying all
+possible sequences of transitions under different probabilities of
+message loss and delay values;
+\item This graph can be checked for reachability by a separate
+reachability checker, which can detect problems such as livelock and
+deadlock;
+\item The graph can also be processed by an additional utility which
+can predict transition throughputs for different parameter values
+(that is, {\tt OUTPUT} loss and {\tt DELAY} values).
+\item The statistics output by the {\em PEW} are, in some cases, more
+accurate, and are more comprehensive. We have used these statistics
+to build performance models based on imbedded Markov chains. A
+utility for solving such models is also included.
+\item A trace of interaction outputs between the various processes
+can be produced by turning on an option in the Options menu of the
+{\em PEW}. This trace is written to a text file named {\tt TRACE}.
+\end{itemize}
+
+Unfortunately, the {\tt ANY} clause is still not supported. The {\em
+PEW} has been used primarily with specifications of point-to-point
+protocols, so this clause has not been needed.
+
+Many of the additions were made as part of my Ph.D. thesis
+which examined the problem of performance analysis
+and prediction from formal specifications (specifically Estelle
+specifications). A modelling method based on imbedded Markov chains
+was employed. Tools to solve these models, and generate them
+automatically in some cases, are also included in this distribution.
+These tools are included in three separate {\tt .ZIP} files,
+together with basic documentation.
+
+\newpage
+\section[Release Contents and Installation]{Release Contents and
+Installation}
+
+The {\em PEW} Version 2.1 distribution includes contains the files:
+
+\begin {itemize}
+\item {\tt pew.exe} -- the editor, compiler and interpreter
+\item {\tt pew\_help.txt} -- the {\em PEW} Help Text file
+\item {\tt pew\_help.idx} -- the {\em PEW} Help Index file
+\item {\tt error.tbl} -- the {\em PEW} error and warning message table
+\item {\tt error.hlp} -- the {\em PEW} error and warning help file
+\item {\tt template} -- the Estelle language template definition file
+\item {\tt langhelp} -- the Estelle language help file
+\item {\tt pewdemo.dat} -- a script file containing commands treated
+as keypresses by the {\em PEW}, for a quick demonstration
+\item {\tt demo.bat} -- a DOS batch file to execute the {\em PEW} demo
+\item {\tt abs.est} -- a specification of the Alternating Bit protocol,
+used by the demo
+\item {\tt ec.exe} -- the stand-alone compiler
+\item {\tt ei.exe} -- the stand-alone interpreter
+\item {\tt reach.zip} -- the reachablity checker, with example
+\item {\tt predict.zip} -- the performance predicter, with example 
+\item {\tt solve.zip} -- the model solver, with example
+\item {\tt epretty.exe} -- an e-code pretty-printer
+\item {\tt userman.tex} - the \LaTeX manual source
+\end{itemize}
+
+Additionally, the disk contains a zip file called {\tt test.zip},
+which contains a number of small Estelle specifications that have
+been used to test different aspects of the {\em PEW}.
+
+These files should all be copied into the directory in which you
+intend developing  your Estelle  specifications. If  you run the
+{\em PEW}  from  a directory  other than that in which it is installed,
+you should set the environment variable {\tt PEWPATH} to contain the drive
+and directory path where the {\em PEW} and its related files can be
+found. Consult your DOS manual for details on setting environment
+variables if you are unfamiliar with this technique.
+
+A program called {\tt unzip.exe} and a batch file called {\tt
+install.bat} is bundled with the {\em PEW} distribution on floppy
+disk. For {\tt ftp} distribution, the files are all in one zipfile,
+so it is assumed you already have {\tt unzip} or its equivalent.
+
+\newpage
+\section[Using the {\em PEW}]{Using the {\em PEW}}
+
+In order  to use  the {\em PEW},  a  specification  must  first  be
+entered, using  the {\em PEW} editor or  some other  editor. The {\em
+PEW} compiler must  then be  used to compile the specification. If an
+error occurs  during compilation,  compilation stops and control
+is returned  to the  editor. The  cursor is  positioned  at  the
+offending location and the error is reported on the message line
+at the bottom of the screen. When the error occurs, it is also
+reported in an error window, which can be cleared by pressing any
+key. An exception to this is pressing {\em F1} or {\em Alt-H}; these
+keys will cause the {\em PEW} to look up the help text associated
+with the error or warning, and display it.
+
+Once a  specification has  been successfully compiled, it may be
+executed using  the interpreter. Each of these components will be
+discussed in turn in the following sections of the manual.
+
+The file DEMO.BAT will cause the {\em PEW} to read `keystrokes' from
+the file PEWDEMO.DAT, and give a short demonstration of some of its
+features.
+
+\newpage
+\section[The {\em PEW} Editor]{The {\em PEW} Editor}
+
+Upon invoking  the {\em PEW}, which you do by simply typing {\tt PEW},
+you are shown a welcome message window.
+Pressing any  key will  remove this  window and place you in the
+{\em PEW} editor. The screen consists of a main menu bar running along
+the top,  an edit  window  occupying  the  bulk  of  the  screen
+(including an  information line  at the top), and a message line
+at the bottom of the screen.
+
+If you  started the {\em PEW} without a file argument, it will attempt
+to open  a file called {\tt NONAME.EST} and load it. Otherwise it will
+attempt to  load the  file that you specified. For example, to start
+the {\em PEW} and load the file {\tt ABS.EST}, you can use the
+command {\tt PEW ABS.EST}. If the {\em PEW} cannot load
+the file you specified (or {\tt NONAME.EST} if you didn't specify any
+file), the editor buffer displayed in the editor window will be
+empty, but will be associated with the corresponding name.
+
+It is possible to save your editor configuration explicitly at any
+time, or automatically when you exit the {\em PEW}. If you do this,
+and you invoke the {\em PEW} without a file argument, it will attempt
+to load the file that was loaded when the configuration was last
+saved. The editor configuration consists of the key assignments,
+keystroke macros, option menu settings, and filenames.
+
+Once in the editor, you may simply type text. Pressing {\em F1} or {\em
+Alt-h}
+at any stage
+will give  you context-sensitive  help. Holding down the Control
+({\em Ctrl}) key  and pressing  the capitalised  letter of a main menu
+option will  result in  that option  being invoked from the main
+menu. This may result in a submenu popping up.  For example, 
+{\em Ctrl-F} will invoke the {\em File Menu}.
+
+When you are in a menu, you may move around with the cursor keys
+or by  pressing the  letter corresponding to a menu option (for
+example, {\em L} for the {\em Load File} command in  the File  Submenu).
+Pressing {\em ENTER} will select
+that menu  option. In some cases this will result in a prompt on
+the message  line (for example, {\em Load File} will prompt you for a file name).
+Sometimes a  default value will appear after the prompt. You may
+edit this  default or your own input using the cursor keys, Del,
+Backspace, Ins  (to toggle insert/overstrike  mode) and  ESC (clear
+value). When you are satisfied press {\em ENTER}. To leave a menu
+without selecting an option use {\em ESC}.
+
+We will now consider the various menus and commands available from
+within the Editor.
+
+\subsection[The Main Menu]{The Main Menu}
+
+The main menu is displayed on the top line of the screen. It is
+accessed from the editor by holding down the {\em Ctrl} key and
+pressing the uppercase letter corresponding to the menu item
+required. If one of the two menus ({\em File} or {\em Options}) is
+invoked, and subsequently exited by pressing {\em ESC}, you will
+remain on the main menu but the menu will close. You can then move
+around the menu with the left and right cursor keys, and press {\em
+ENTER} to select a menu item. To get back to editing, select the
+{\em Edit} item. The main menu items are:
+
+\begin{describe}{xxxxxxxx}
+\item[\em Ctrl-F]Invoke the File Submenu (see
+Section~\ref{filemenu}).
+\item[\em Ctrl-E]Resume editing.
+\item[\em Ctrl-C]Compile the Editor File.
+\item[\em Ctrl-X]eXecute the Editor File, compiling it first if necessary.
+\item[\em Ctrl-O]Invoke the Options Submenu (see
+Section~\ref{optionmenu}).
+\item[\em Ctrl-A]Invoke the Analyze Submenu (see
+Section~\ref{analmenu}).
+\end{describe}
+
+\subsection[The File Submenu]{The File Submenu}
+
+The File submenu contains commands primarily pertaining to the
+manipulation of files, such as loading and saving files to and from
+the editor. The items available are:
+
+\label{filemenu}
+\begin{describe}{xxxxxxxxxxxxx}
+\item[\em Load File]Specify a file to load from disk into the editor
+buffer.
+\item[\em Load Log]Load the execution summary file `ESTELLE.LOG' from
+disk. See Section~\ref{logfile} for details.
+\item[\em Save]Save the edit buffer to disk using the current {\em Save
+Name}.
+\item[\em Change Name]Change the current {\em Save Name}.
+\item[\em New]Clear the Editor buffer.
+\item[\em Goto Line]Move the cursor to a specified line in the edit
+buffer.
+\item[\em OS Shell]Run a DOS shell. Type "exit" to return from DOS to
+the {\em PEW}.
+\item[\em Quit]Quit to DOS. You may also use {\em Alt-Z} to quit.
+\item[\em Read Scrap]Read a disk file into the scrap buffer. The scrap
+buffer is used for `cut and paste' editor operations.
+\item[\em Write Scrap]Write the scrap buffer contents to a disk file.
+\end{describe}
+
+\subsection[The Compile and Execute Commands]{The Compile and Execute
+Commands}
+
+These two main menu options allow you to compile you Estelle program,
+and invoke the interpreter. The {\em Compile} command will simply
+attempt to compile your specification. If a compilation error
+occurs, this will be reported in a pop-up error window. You may press
+any key to remove this window (other than {\em F1} or {\em Alt-H},
+which will cause help pertaining to the error to be displayed);
+the error message will then be
+shown on the message line and the cursor positioned where the
+compiler encountered the error.
+
+Error messages contain a text message, a line number, and an {\em
+error code}. Error codes consist of an `E' followed by a three-digit
+number. These error codes are used internally to identify the place
+in the {\em PEW} where the error occurred, and can be ignored by the
+user.
+
+The {\em Execute} command will only compile the program if it has not
+already been compiled. If compilation is unsuccessful, then you may
+proceed as if you had just selected {\em Compile}. If compilation is
+successful, after pressing a key to clear the Compile window (if
+applicable) you will be placed in the {\em PEW execution
+environment}. This will be dealt with in detail later.
+
+\subsection[The Options Submenu]{The Options Submenu}
+\label{optionmenu}
+
+This menu contains various options which may be set according to 
+your preferences for the editor; for example, how lines that are too
+long to be displayed on a single screen line are to be treated. It
+also is where you enter search and replace text strings for these
+editor commands. The available items are:
+
+\begin{describe}{xxxxxxxxxxxxxxxxxx}
+\item[\em Tabsize]Specify the default tab stop setting. The {\em PEW}
+editor handles tabs in a rather primitive fashion. Whenever the TAB
+key is pressed, or a file is loaded, all tabs are expanded to spaces
+using the current tabsize setting. When you save a file, this process
+may be reversed depending on the {\em Fill Character} option (see
+below). Thus while using the editor, all whitespace is effectively
+made up of space characters, not tabs. To make this slightly less
+unwieldy, the backspace key can be used with a Shift key to delete
+all whitespace up to the previous tab stop.
+\item [\em Backup Files]If this option is on, the {\em PEW} will
+rename the old copy of a file before saving a new copy. The old
+backup copy will have the same name but a `.BAK' extension.
+\item[\em Fill Character]If this is set to Tabs, then spaces will be
+compressed into tabs wherever possible when a file is saved to disk,
+using the current {\em Tabsize} setting. See {\em Tabsize} for more
+details.
+\item[\em Wrap Mode]Switch between line wrap mode or horizontal
+scroll mode. This affects the treament of long lines. When wrap mode
+is on, long lines are `wrapped' over when necessary onto the next
+screen line. When wrap mode is off, long lines are truncated at the
+left and right edit window edges, and the entire display is scrolled
+left and right as necessary.
+\item[\em Left Search]This lets you specify a set of characters to be
+used by the character set matcher. Whenever {\em Ctrl-PgUp} is
+pressed, the cursor will be moved backwards to the first character in the edit
+buffer that matches any character from the specified set. This can be
+used as a simple parenthesis matching facility.
+\item[\em Right Search]This is equivalent to the {\em Left Search}
+option described above, except that the cursor is moved forward in
+the file rather than backward.
+\item[\em Search Text]Allows you to specify the current search text for the search
+and translate commands.
+\item[\em Translate Text]Allows you to specify the current
+replacement text used by the translate command.
+\item[\em Case Sensitivity]Lets you toggle case sensitivity on and off
+for use in searching and translating.
+\item[\em Identifiers Only]Lets you toggle identifier matching on and off
+for use in searching and translating. When this option is on, the
+search text must correspond to text in the edit buffer which is
+surrounded by whitespace or punctuation only. This is useful is you
+wish to, for example, change all occurences of the identifier
+`alternating\_bit' to `AB', but you don't want to change any
+occurences of the identifier `alternating\_bit\_body' in the process.
+\item[\em Autosave Config]When this option is on, the editor
+configuration is saved automatically upon exit. The configuration is
+saved in the file {\em PEW.CFG}.
+\item[\em Save Config]Save the configuration immediately. The editor
+configuration consists of the current file name and position,
+option menu settings, and key assignments and macros.
+\item[\em Random Seed]This option allows you to specify a seed for
+the pseudo-random number generator (the seed is usually chosen
+randomly).  It allows you to replicate an execution, even though
+executions are, in principle, nondeterministic.
+\item[\em Generate Trace]If this option is on, the {\em PEW} will
+produce a file called {\tt trace} when the specification is executed.
+This file shows the sequence of interactions that are exchanged
+between processes over time.
+\end{describe}
+
+\subsection[Fixed (Non-Reassignable) Commands]{Fixed (Non-Reassignable)
+Commands}
+
+At present, all editor commands are non-reassignable; however,
+all that is lacking is the ability to edit the default key
+assignments. The commands listed in this section are those whose
+key assignments are "hard-coded" into the editor, and cannot be
+changed even when a key-assignment editor has been written.
+
+\begin{describe}{xxxxxxxxxxxxxxx}
+\item[$\uparrow$]Move the cursor up one line.
+\item[$\downarrow$]Move the cursor down one line.
+\item[$\leftarrow$]Move the cursor left one character.
+\item[$\rightarrow$]Move the cursor right one character.
+\item[\em Home]Move the cursor to the start of the current line.
+\item[\em End]Move the cursor to the end of the current line.
+\item[\em PgUp]Scroll the screen up.
+\item[\em PgDn]Scroll the screen down.
+\item[\em Del]Delete the character under the cursor.
+\item[\em Backspace]Delete the character immediately before the
+cursor.
+\item[\em Shift-Backspace]Delete all whitespace characters up to the
+previous tab stop setting.
+\item[{\em F1} or {\em Alt-H}]Provide help.
+\end{describe}
+
+\subsection[Other Cursor Movement Commands]{Other Cursor Movement Commands}
+
+This section lists the remaining cursor movement commands that are
+available. Remember, you can use the {\em Goto Line} command on the
+File menu to position the cursor on a specific line.
+
+\begin{describe}{xxxxxxxxxx}
+\item[\em Ctrl-$\leftarrow$]Move cursor left one word.
+\item[\em Ctrl-$\rightarrow$]Move cursor right one word.
+\item[\em Ctrl-Home]Move cursor to the start of the file.
+\item[\em Ctrl-End]Move cursor to the end of the file.
+\item[\em Ctrl-P]Set a bookmark. Up to ten positions in the file can
+be remembered with this facility, and recovered with the {\em Goto
+last bookmark} command described below.
+\item[\em Ctrl-G]Goto last bookmark. This command restores a
+remembered cursor position that was saved with the {\em Set a
+bookmark} command described above. Positions are restored in the
+opposite order to which they are saved, and the bookmark list is
+cyclic.
+\end{describe}
+
+\subsection[Block Commands]{Block Commands}
+
+\begin{figure}
+\vspace{15cm}
+\caption{\label{normal-block} An example of a Normal block}
+\end{figure}
+
+This section describes commands used to cut and paste blocks of text.
+
+Blocks can be cut and pasted in two forms: {\em normal} blocks and
+{\em column} blocks. Normal blocks are simply contiguous character
+sequences from the file, for example, all text from line 10 column 13
+to line 17 column 2 inclusive.
+Column blocks are columnar substrings
+of line ranges, for example, columns 10 through 20 of lines 10
+through 19 inclusive.
+There are commands for marking blocks of either
+type, and for pasting blocks of either type. The two types can be
+combined, that is, a block can be cut as a normal block and pasted as
+a column block, and vice-versa.
+
+Blocks are delimited by firstly dropping a {\em mark} of the
+appropriate type at the one extreme, and then moving to the other
+extreme position. The block will be highlighted during this process.
+The block may then be cut or copied to the scrap buffer,
+from where it may be pasted.
+
+It is also possible to save the contents of the scrap buffer to a
+file, or load the contents of a file into the scrap buffer. These
+operations were described in Section \ref{filemenu}.
+
+\begin{describe}{xxxxxxxxxxxxxxxxxxx}
+\item[\em Alt-M]Set a normal mark.
+\item[\em Alt-C]Set a column mark.
+\item[\em Alt-- (Alt-Minus)]Copy marked text to scrap buffer.
+\item[\em Del]Delete marked text, copying to scrap buffer.
+\item[\em Ins]Paste scrap buffer contents at cursor position as a
+normal block.
+\item[\em Alt-P]Paste scrap buffer contents at cursor position as a
+column block.
+\end{describe}
+
+
+\subsection[Search/Translate Commands]{Search/Translate Commands}
+
+The search/translate commands provide the means to loacte specific
+text or characters, and to replace occurences of some text string
+with a different text string. 
+See Section \ref{optionmenu} for details on how to specify the search and
+translate text patterns, and character match sets.
+
+\begin{describe}{xxxxxxxxxx}
+\item[\em Alt-S]Search forward from cursor position for search text.
+\item[\em Ctrl-S]Search backward from cursor position for search
+text.
+\item[\em Alt-T]Translate text which matches the search text to the
+specified translate text.
+\item[\em Ctrl-PgUp]Perform left character match.
+\item[\em Ctrl-PgDn]Perform right character match.
+\end{describe}
+
+\subsection[Miscellaneous Commands]{Miscellaneous Commands}
+
+\begin{describe}{xxxxxxxx}
+\item[\em Alt-Z]Quit the {\em PEW} and return to DOS.
+\item[\em Alt-U]Undo all changes that have been made to the current line
+since moving the cursor onto this line.
+\item[\em Alt-R]Record a keystroke macro and assign to key. Keystroke
+macros can be assigned to the keys Alt-0 through Alt-9. At present,
+they may only be used in the editor, not in the execution
+environment. After pressing Alt-R, you will be asked to press the key
+to which you are assigning the macro. All keypresses will
+be recorded until the macro key is pressed again. Subsequent presses
+of the macro key will insert the macro characters into the keyboard
+buffer, where they will behave as though they had been pressed.
+\item[\em Alt-D]Delete the current line.
+\item[\em Alt-F1]Call up language help for the Estelle keyword at the
+current cursor position, if any.
+\item[\em Ctrl-F1]Perform template expansion on the Estelle keyword
+at the current cursor position, if any.
+\end{describe}
+
+The last  two commands make use of the 'template' and 'langhelp'
+files. Both of these files may be
+freely edited, allowing you to create your own help and template
+details.  In  each  case,  the  word  at  which  the  cursor  is
+positioned is  used as a lookup index into the appropriate file;
+if an  entry is  found, it is displayed (in the case of help) or
+it replaces the index word (in the case of template expansion).
+The file formats consist of alphabetically sorted entries, where each
+entry begins with a index line consisting of an `@' character
+followed by the string which is used as the match index, and then a
+number of lines containing the help or replacement text. For the help
+file, the tilde character `\~' can be used to indicate the start of a
+new line. You must maintain the alphabetical ordering of the
+indices, as a binary search method is used on these files and they
+are assumed to be sorted.
+
+\subsection[The Analyze Submenu]{The Analyze Submenu}
+\label{analmenu}
+
+The Analyze menu provides you with a way to execute a specification a
+number of times, varying a single parameter (called the {\em
+independent variable}) through a range of values. Up to eight {\em
+dependent expressions} can be entered using an expression editor, and
+the values of these expressions will be tabulated in the {\em PEW}
+log file.
+
+The use of the Analyze menu is best illustrated by example. We shall
+use the sample specification of the Alternating Bit protocol, to
+calculate the throughput and error rate of this protocol as a
+function of the timeout. We will vary the timeout from 3 seconds to 6
+seconds, in steps of one second each. For each timeout, we will
+excercise the protocol for 15 minutes of simulated time (9000
+seconds).
+
+The throughput and error rate of the protocol depend on the total
+time, and the execution counts of two transitions: the {\em timeout
+and retransmit} transition, and the {\em received acknowledgement}
+transition. The first represents the number of unsuccessful
+transmissions, while the second is the number of successful
+transmissions. In the specification, these transitions are named {\em
+Retrans} and {\em GotACK} respectively. This gives us the equations:
+
+\begin{itemize}
+\item $Thruput = GotACK / time$
+\item $Err_Rate = Retrans / (Retrans+GotACK)$
+\end{itemize}
+
+We now have sufficient background to perform the analysis. The steps
+involved are as follows:
+
+\begin{itemize}
+\item Load the {\tt abs.est} specification into the editor.
+\item Comment out or delete the line in the constant definition
+section which specifies {\tt Timeout=4}. This is necessary as the
+analysis process will be defining this constant for us.
+\item Press {\tt Ctrl-A} to invoke the analyse menu.
+\item Move the highlight to {\em Independent Variable} and press {\em
+ENTER}. You will be prompted to enter a variable name. Enter {\tt
+Timeout}.
+\item Move the highlight to, select and enter the values 3, 6 and 1
+for the menu options {\em From Value}, {\em To Value} and {\em
+Stepsize} respectively.
+\item Select the {\em Edit Dependents} option. A new window will
+appear on the screen; this is the {\em expression editor}. It works
+similarly to the usual editor, except that the {\em ESC} key clears
+the current line and the {\em RETURN} or {\em ENTER} key returns to
+the menu. The cursor keys, {\em Ins}, {\em Del} and {\em Backspace}
+all work as usual. Enter the expressions for throughput and error
+rate as they appear above. The general rules for expressions are that
+(i) an expression must have a unique identifier on the left hand of the
+assignment, and must only refer to transition names and the
+predefined identifier {\em time} on the right hand side, and (ii) an
+expression may not be split over more than one line. Expressions are
+only parsed after all the executions are complete, so it is often
+wise to do a quick test run with a single value of the independent
+variable. Badly parsed expressions, or those that involve division by
+zero, have their results indicated as a string of hashes (\#\#\#\#). In
+Version 1.2 of the {\em PEW} expressions may not refer to other
+expressions, and are not saved when the {\em PEW} is quit.
+\item Select the {\em Analyze} option. You will be prompted for an
+execution timelimit. Enter 9000.
+\end{itemize}
+
+The {\em PEW} will now compile and execute the AB specification for
+each value of {\tt Timeout}, tabulate the results of all named
+transitions, and the results of all dependent expressions. We can
+then examine the log file, and see how our timeout setting affected
+the throughput (measured in frames per second) and error rate (a
+proportion).
+
+In the case of the AB specification, there are two instances of AB
+protocol processes executing. The {\em PEW} keeps track of the number
+of instances of a process as well, and uses the mean value of the
+execution count when evaluating expressions. In other words, if the
+first AB instance had 47 retransmissions, and the second had 51, the
+{\em PEW} will report and use the value 49.
+
+\newpage
+\section[The Execution Environment]{The Execution Environment}
+\label{execenv}
+
+We now turn to the interpreter and its user-interface, which we refer
+to as the {\em PEW Execution Environment}. This is a separate
+environment to the editor environment in that files cannot be edited
+in the execution environment, and the main menu bar is inaccessible,
+with the exception of the {\em Edit} command which returns to the editor
+environment. The latter can be done by pressing {\em Ctrl-E} as
+before, or alternatively {\em Alt-Z}.
+
+\subsection[The Implementation of Time]{The Implementation of Time}
+Before we consider the user-interface to the execution environment,
+it is appropriate to explain how process scheduling and the handling
+of time has been implemented in the {\em PEW}. 
+We distinguish between the {\em simulation time} and the {\em
+scheduler iteration}.
+Execution proceeds systematically iteration by iteration until
+all possibilities  are exhausted  - only  then are {\tt DELAY} clauses
+examined to  determine if  progress is possible in the future or
+whether deadlock  has occurred.  If all  that is  preventing the {\em
+PEW} from proceeding is a {\tt DELAY} clause, the {\em simulation
+time} is
+increased by the smallest delay found. This  process  continues
+indefinitely  until deadlock occurs or the user terminates it.
+
+{\tt DELAY} clauses are handled as follows: in the case where only
+one argument is specified, that argument is used as the delay value.
+Where two arguments are specified, a delay value between the two is
+chosen (arbitrarily, according to the specified distribution)
+as the actual delay. Within a specification, compiler directives can
+be sprinkled specifying the delay distribution to be used. The
+default is a uniform distribution, selected with the directive
+\{\$U\}.
+Also available are Poisson distributions, geometric distributions,
+and an exponential distributions. Each of these requires an argument
+specifying the expected value, and they have the forms \{\$P{\em val}\},
+\{\$G{\em val}\} and \{\$E{\em val}\} respectively.
+
+As time only progresses when {\tt DELAY} clauses are present, the
+{\em PEW} differs from the Estelle standard, which specifies that
+time must eventually advance. A specification with no {\tt DELAY} clauses will never
+advance beyond time 1 in the {\em PEW}, as all transitions without
+{\tt DELAY}s are
+regarded as requiring no time to execute. It was felt that this was a
+more appropriate implementation as it affords the user more control
+over the handling of time. 
+
+At each iteration, every  transition of every active process is
+scrutinised to see if  it is  enabled. Subsequently  we iterate
+through  each  active  process and execute   any   selected
+transitions. The process thus consists of:
+
+\begin {itemize}
+\item Step 1:    Evaluate all transition clauses
+\item Steps 2-n: Iterate recursively through each active process, executing a transition if
+appropriate
+\end{itemize}
+
+\subsection[Controlling Execution]{Controlling Execution}
+
+The first step described above is regarded as atomic and non-interruptable in the
+{\em PEW}. It is only possible to step execution through transition
+bodies, {\em not} their clauses. However, the {\em PEW} provides
+tabular information about clause evaluation, so
+that the results of this process can be examined. For controlling the
+execution of a specification, several alternatives are available.
+
+It is possible to single-step execution in the {\em PEW} on three
+different levels: the level of Estelle statements, the level of
+transition blocks, and the level of scheduler iterations. This is
+achieved using the {\em F2}, {\em F3} and {\em F4} keys respectively.
+
+Execution may also be {\em animated}, that is, execution may
+proceed automatically with a user-specified delay between the
+execution of each Estelle statement. To select this option, use {\em
+F9}. You will be prompted to enter an inter-statement animate delay
+in units of milliseconds. Entering a delay value of zero (the
+default) specifies {\em Fast Execution}. This
+is useful when you wish to quickly execute to a certain time or
+breakpoint, or are only interested in the execution summary. Unlike
+animation where full screen updating is constantly  performed,
+during fast execution only the time display is updated. This leads to a great
+speed improvement in execution.
+After specifying the delay, you will
+be asked to specify a time at which execution is halted and
+control returned to the user. If you enter a value of zero (the
+default), execution will continue until an interruption or
+breakpoint.
+
+Note that the timing routine used for animation delays is
+ill-behaved on some hardware; if you select animation and nothing
+seems to be happening, wait for about 15 seconds and the animation
+should begin.
+
+Both animation and fast execution may be interrupted at any time
+by a keypress. When memory runs low, the {\em PEW} will not allow
+fast execution to occur, but will always switch back into single-step
+mode.
+
+\subsection[The Process Browser]{The Process Browser}
+
+Within the execution environment, the screen display changes
+considerably from the editor environment.
+
+The first thing to notice is that the edit window is still present,
+but now only displays five lines of the Estelle source. Three new
+windows have been added to the screen; these, together with the
+message line at the bottom of the screen, constitute the {\em Process
+Browser}. The windows are entitled {\em Children}, {\em Transitions},
+and {\em Interaction Points}. The sizes of the new windows may be
+altered by using {\em Shift-F1} and {\em Shift-F2}. The size of the
+edit window is fixed.
+
+At any stage, there is a single {\em current active process}.
+During execution, this process is the same as the {\em currently
+executing process}; however, during browsing, the user may make any
+process the current active process without affecting the currently
+executing process. The Process Browser always displays information
+pertaining to the current active process, specifically its module
+variables (in the {\em Children} window), its transitions (in the {\em
+Transitions} window) and its interaction points (in the {\em
+Interaction Points} window). The attribute, module variable name,
+module body type and current state of the current active process are displayed on the
+message line. A two character abbreviation is used for attributes,
+namely:
+\begin{itemize}
+\item Un - Unattributed
+\item SP - Systemprocess
+\item SA - Systemactivity
+\item Pr - Process
+\item Ac - Activity
+\end{itemize}
+In the case of the specification itself, the name of the
+specification is displayed as the module body type, while the keyword
+`Specification' is displayed in place of the module variable name.
+
+At any stage there is a {\em current active window}. This window
+contains a highlight bar, which can be moved up and down with the
+cursor keys. The highlight bar is used to select items (be they
+transitions, module variables, source lines or interaction points)
+upon which actions may be taken. Only non-empty windows may be
+active. To switch from one window to another, the {\em F6} key is
+used. Within each window, pressing {\em ENTER} results in some
+action, usually the popping up of a menu. Each window will be
+considered in turn.
+
+\subsubsection[The {\em Source} Window]{The {\em Source} Window}
+
+The source window is the original edit window. The name {\em Source}
+window rather than {\em Edit} window is to emphasise the fact that
+it is not possible to edit the file during execution.
+This window allows the user to examine the
+Estelle source code, and to track execution when single-stepping on
+Estelle statements.
+
+The source window indicates the currently executing source line with
+an arrow on the left-hand border of the window. This arrow may or may
+not be visible, depending on whether the executing line  is visible
+within the window or not (if not, it is because the highlight bar has
+been moved away from it; the highlight bar is always visible in the
+active window and the window contents are scrolled if necessary to
+allow this). When the scheduler is running, this arrow changes to an
+`s'.
+
+Pressing {\em ENTER} inside the source window invokes the {\em Line
+Menu}. This menu has three commands: {\em Set Breakpoint}, {\em View
+Breakpoints} and {\em Goto Line}.
+
+The {\em Set Breakpoint} and {\em View Breakpoints} commands are
+common to the other window menus as well, although the type of
+breakpoint created by the {\em Set Breakpoint} command varies
+depending on the window. For the source window, breakpoints are set
+on Estelle source lines. Before each line is executed, a check is
+made to see if a breakpoint has been set on that line, and if so,
+this breakpoint is processed before the line is executed. The details
+of breakpoint setting and the {\em View Breakpoints} command will be
+dealt with in Section~\ref{brkpt-sec}.
+
+The remaining command, {\em Goto Line}, is identical to the editor
+version; you will be prompted to enter a line number, and the
+highlight will subsequently be positioned at that line.
+
+Remember, help is available at any stage by pressing {\em F1}.
+
+\subsubsection[The {\em Children} Window]{The {\em Children} Window}
+
+This window displays the module variables of the current active
+process. It should be noted that the {\em PEW} gathers much of its
+symbolic information during execution of a specification. This has
+several implications, amongst them the fact that it only knows that a
+process has module variables once it begins to execute that process,
+and that it only knows the names of module variables once they have
+been initialised. Uninitialised module variables are simply dsplayed
+as having the name `Uninitialised'.
+
+Pressing {\em ENTER} on a highlighted module variable will make the
+ process associated with
+that module variable the current active process. In this way it is
+easy to move down the process hierarchy. To move up this hierarchy,
+the {\em F5 Up Level} key is used; this activates the parent of the
+currently active process. When a different process is activated, all 
+the windows of the process browser will change to reflect the new
+active process.
+
+By using the {\em F5} key in conjunction with the {\em Children}
+window, it is a simple matter to examine any process.
+
+\subsubsection[The {\em Transitions} Window]{The {\em Transitions} Window}
+
+This window shows the transitions associated with the current active
+process. In each case, the priority is displayed (if there is one),
+followed by the {\em from} and {\em to} states of the transition.
+These are followed by details about the clause evaluation of each
+transition, namely the state of the {\em Provided}, {\em When} and
+{\em Delay} clauses, whether the transition was {\em Enabled}, and
+whether it has been {\em Selected} for execution. Each of these is
+identified by an appropriate letter, namely {\em W, P, D, E} and {\em S}
+respectively. In each case the convention used is 0 for false, 1 for
+true, and a -- for not applicable (in other words, no such clause
+exists for that transition).
+
+Furthermore, the transition window will indicate the
+currently executing transition with an asterisk on its left. If the
+current active process is not the current executing process, no
+asterisk will be seen.
+
+Pressing {\em ENTER} on a highlighted transition will invoke the {\em
+Trans Menu}. This menu includes the {\em Set Breakpoint} and {\em
+View Breakpoints} commands mentioned earlier, which are discussed
+in Section~\ref{brkpt-sec}.
+
+The remaining command in the {\em Trans Menu} is {\em View Stats}.
+This command displays a table of statistics associated with the
+currently highlighted transition. This table contains the fields:
+\begin{describe}{xxxxxxxx}
+\item[\em From]The {\em from} state of the transition;
+\item[\em To]The {\em to} state of the transition;
+\item[\em Enabled]A count of the number of times the transition has been enabled
+for execution;
+\item[\em Fired]A count  of the number of times the transition has been fired
+or executed. This may differ from the previous figure, as being
+enabled does not necessarily imply being selected for execution;
+\item[\em First]The time at which the transition was first enabled;
+\item[\em Last]The most recent time when the transition was enabled;
+\item[\em Back]The mean time elapsing between this transition being
+executed and the transition just preceding it being executed;
+\item[\em Self]The mean time elapsing between successive occurences
+of this transition;
+\item[\em Forward]The mean time elapsing between this transition
+being executed and the transition just following it being executed.
+\end{describe}
+In the case where multiple {\em from} states where specified in the
+transition, the {\em from} state will be displayed as a number of
+periods `...'.
+
+\subsubsection[The {\em Interaction Points} Window]{The {\em Interaction
+Points} Window}
+
+This window shows the names, reception queue lengths and reception
+queue contents of the interaction points of the current active
+process. It is possible to scroll through a long queue by
+highlighting its interaction point and using the left and right
+cursor keys to move forwards and backwards respectively.
+The displayed length will change to reflect the length
+of the queue from the first {\em displayed} interaction to the end of
+the queue.
+
+By pressing the {\em DEL} key, the first {\em displayed} interaction
+in the currently highlighted queue can be deleted. Confirmation of
+the deletion will be requested before it is performed. This provides
+a way to test how a specification handles lost interactions without
+having to write Estelle code to randomly lose interactions.
+
+Pressing {\em ENTER} invokes the {\em IP Menu} for the currently
+highlighted interaction point. As for the {\em Line Menu} and {\em
+Trans Menu}, the {\em Set Breakpoint} and {\em View Breakpoints}
+commands are once again available. Two other commands are available:
+{\em View Stats} displays a statistics table for the currently
+highlighted inetraction point, while {\em View CEP} will find the
+connection endpoint of this interaction point, and activate its
+containing process, as well as highlighting the appropriate
+interaction point. This latter command provides an easy way to
+examine the statistics for interactions output through an interaction
+point: the statistics and queue displayed are for reception only,
+thus by viewing the reception statistics of the connection endpoint of
+an interaction point, the transmission statistics and queue can be
+seen. These are complicated in the case of common queues or complex
+connection and disconnection sequences but these are rare in
+practise.
+
+The statistics table for an interaction points contains the fields:
+\begin{describe}{xxxxxxxxxxxxxx}
+\item[\em Name]The name of the interaction point;
+\item[\em Total Traffic]The total number of interactions dequeued
+through this IP due to the execution of {\tt WHEN} clauses;
+\item[\em Mean Length]The average length of the reception queue of
+this IP;
+\item[\em Max Length]The longest length ever reached by the
+reception queue of this IP;
+\item[\em Mean Time]The average length of time spent by an
+interaction in the reception queue before being dequeued;
+\item[\em Max Time]The maximum length of time spent by an
+interaction in the reception queue before being dequeued.
+\end{describe}
+
+\newpage
+\section[Breakpoints]{Breakpoints}
+\label{brkpt-sec}
+
+The {\em PEW} allows breakpoints to be set on line numbers being
+reached, transitions being enabled or executed, and interactions
+being output through interaction points. The type of breakpoint
+depends on which window is active when the breakpoint is set;
+breakpoints are always set on the currently highlighted item (line,
+transition or interaction point) in the current active window. For
+transition breakpoints, the user must also specify whether the
+breakpoint is on {\em enablement} or {\em execution} of the
+transition.
+
+Breakpoints may include {\em pass counts}, specifying a number of
+times that the breakpoint conditions must hold before the breakpoint
+{\em matures} or fires. The default pass count is zero.
+
+Breakpoints may be {\em active} or {\em suspended}; suspended
+breakpoints do nothing and are not checked, but may be reactivated
+later explicitly by the user, or by the action of some other
+breakpoint. The other action that may be taken by a breakpoint is to
+dump specified information to the log file {\tt ESTELLE.LOG}.
+
+After maturing, a breakpoint may be {\em reset} or {\em suspended}.
+If it is reset, its pass count will be reset as well, so it will
+behave as though it had just been set by the user for the first time.
+
+It is also possible to specify  whether a breakpoint should return
+control to the user or simply continue with execution. The latter is
+useful when the breakpoint has an action such as reactivating a
+different breakpoint or dumping information. Often a breakpoint will
+have no action other than to return control to the user.
+
+Breakpoints set on transitions and interaction points may be
+constrained to affect only the process that was active when they were
+set, or to hold across all peer processes with the same body type. In
+the latter case, any such process which satisfies the breakpoint
+conditions will cause the pass count to be decremented, and this pass
+count is shared between all such processes. In other words, a
+breakpoint with a pass count of five that is set on a single process
+will mature after that process has satisfied the breakpoint
+conditions five times, while one set on any process of that type will
+mature after it has been satisfied five times in total by any of the
+appropriate processes. Thus, breakpoints set on a single process give
+a finer degree of control than those set on process types.
+
+\begin{figure}
+\vspace{15cm}
+\caption {\label {brkpt-menu} The Breakpoint Menu}
+\end{figure}
+When the {\em Set Breakpoint} command is selected from one of the
+window menus, the {\em Breakpoint Menu} is invoked (see Figure
+\ref{brkpt-menu}).
+The bottom few lines of this menu give details about
+the breakpoint, namely the {\em breakpoint number}, the
+item on which the breakpoint is being set, and the current active
+process, if relevant.
+
+The {\em Action} fields specify whether the
+breakpoint should activate some other suspended breakpoint, and if
+so, which one (specified by its breakpoint number), and 
+whether information should be dumped to the log file.
+The dumped information consists of any combination of transition and
+interaction point information, corresponding to the window contents
+and statistics tables. The information may be dumped for any of the
+following cases:
+\begin{itemize}
+\item The current process
+\item The current process and all its peers of the same body type
+\item The current process and all its peers
+\item All processes
+\end {itemize}
+The information to be dumped is selected with the {\em Dump Pane}
+option, while the case is selected with the {\em Process} option.
+
+The first few options in the {\em Breakpoint Menu} specify:
+
+\begin{itemize}
+\item {\em Pass Count} The number of times the breakpoint must mature
+before any action will be taken
+\item {\em Process} Whether the breakpoint applies to the current
+process only, or to all peer processes with the same body type (this
+is not applicable for line breakpoints)
+\item {\em Transition} If the breakpoint is set on a transition, is
+it for the enablement of the transition, or its execution?
+\item {\em Control} Should control return to the user when the breakpoint
+matures, or should execution continue?
+\item {\em Reset} Should the breakpoint be reactivated after
+maturing, or should it be suspended?
+\item {\em Active} Is the breakpoint currently active or suspended?
+\end {itemize}
+Once all the relevant information has been selected, the {\em Ready}
+command at the top of the menu should be executed. If you wish to
+cancel setting the breakpoint before selecting {\em Ready}, press
+ESC.
+
+If the {\em View Breakpoints} command is selected from a window menu,
+the {\em Breakpoint Browser} is invoked.
+This browser allows the user to examine,
+modify or delete 
+breakpoints. Suspended breakpoints have parentheses about their
+number. By pressing {\em Del} the user may delete
+the currently highlighted or all breakpoints; by pressing {\em Enter}
+the {\em Breakpoint Menu} is reinvoked for that breakpoint so that
+it may be edited.
+
+\newpage
+\section[The Log File]{The Log File}
+\label{logfile}
+At the end of execution, the logfile contains a summary of queue
+traffic and  transition firing  statistics as well as information
+dumped as a result of breakpoint actions, and having the Log option
+on. This latter option is toggled using the {\em F8} key and turns
+full information dumping on for all processes at every scheduler
+iteraction. This allows a detailed trace of the execution of a
+specification to be captured. Be warned that such traces grow very
+large very quickly!
+
+The log file enables us to
+determine the  probabilities of  transitions firing, and thus to
+easily calculate throughput and error rates of protocols.
+
+The log file also contains matrices of {\em transition sequence
+execution counts} and {\em transition sequence delays}. These are the
+number of times each transition in each process was followed by each
+other transition in that process, and the mean delay in each case.
+These figures are used for building Markov process models of the
+long-term behaviour of the executing specifications when viewed as
+stochastic processes.
+At the end of the log, global matrices are printed out. The global
+transition sequence count matrix includes {\em linkage counts}
+between processes showing the relationships between transitions that
+{\tt OUTPUT} interactions and the corresponding receiving {\tt WHEN}
+transitions.
+
+\newpage
+\section[Technical Reference]{Technical Reference}
+
+This section details the limitations of the {\em PEW}, and its error
+messages. For details on the restrictions and extensions of this
+implementation of Estelle, refer to the Appendix.
+
+\subsection[System Limits]{System Limits}
+
+\vspace{1cm}
+{\large Hardware Requirements:}
+
+\begin{itemize}
+\item 8086 processor running MS-DOS or PC-DOS (i.e., IBM PC, PC-AT or
+compatible), with at least 256kB of memory
+\item An EGA/VGA or compatible display is preferable.
+\end{itemize}
+
+\vspace{1cm}
+{\large Editor Limits:}
+
+\begin{describe}{xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
+\item[Maximum line length]255 characters
+\item[Maximum character search set]15 characters
+\item[Maximum number of place marks]10
+\item[Maximum keystroke macro length]128 keystrokes
+\end{describe}
+
+\vspace{1cm}
+{\large Compiler Limits:}
+
+\begin{describe}{xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
+\item[Maximum string constant length]80 characters
+\item[Maximum number of case indices]256; all case values must fall
+in the range of 0..255.
+\item[Maximum allowed distinct identifiers]500
+\item[Symbol Table Size]30 kB
+\item[String Table Size]5000 bytes
+\item[Code Buffer Size]10000 words
+\item[Maximum identifiers in {\tt EXIST} expression]16 (this also applies
+to the {\tt ALL} and {\tt FORONE} constructs).
+\item[Maximum Set Size]64; all set values must fall in range 0..63.
+\item[Maximum Scope Levels]16. {\tt WITH} statements and
+others that introduce new identifiers all use one or more scope
+levels.
+\end{describe}
+\vspace{1cm}
+{\large Interpreter Limits:}
+\begin{describe}{xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
+\item[Maximum per-process heap size]1024 words (characters and
+integers each use up one word).
+\item[Maximum number of breakpoints]32
+\end{describe}
+\vspace{1cm}
+
+\subsection[System and Editor Error Messages]{System and Editor Error Messages}
+
+
+\begin{description}
+\item[Memory allocation failure]\mbox{}\\
+An attempt to allocate memory failed. This error often results in
+the {\em PEW} aborting. If you have been editing a file, this will be
+saved to a temporary file and a message to that effect will be
+printed.
+
+\item[Illegal argument passed to function {\em fn}]\mbox{}\\
+This is an internal error. It is unlikely to ever occur.
+
+\item[Cannot save screen image]\mbox{}\\
+You attempted to run a DOS shell but the {\em PEW} could not
+allocate sufficient memory to save the screen contents. In this
+case, it is very unlikely that a shell could be executed successfully
+anyway!
+
+\item[Cannot find COMMAND.COM]\mbox{}\\
+You attempted to run a DOS shell but the {\em PEW} could not find
+your copy of {\tt command.com}.
+
+\item[Insufficient memory]\mbox{}\\
+An attempt to run a DOS shell failed due to lack of available
+memory.
+
+\item[Error while trying to execute COMMAND.COM: {\em n}]\mbox{}\\
+An error occurred during an attempt to run a DOS shell. The number
+corresponds to the DOS error code for whatever error occurred.
+
+\item[Cannot open file: {\em fl}]\mbox{}\\
+You attempted to load a nonexistent file into the editor.
+
+\item[Illegal input: integer value required]\mbox{}\\
+You executed some command which expected a number as input but
+found something else instead.
+
+\item[Illegal input: line number out of range]\mbox{}\\
+You attempted to execute a {\em Goto Line} command to a line which
+does not exist.
+
+\item[Illegal tabstop value]\mbox{}\\
+You entered an invalid tab stop value.
+
+\item[Cannot open help index file]
+\item[Cannot open help text file]\mbox{}\\
+You are missing one or both of the {\em PEW} help files in your
+PEWPATH directory, or current directory if the PEWPATH environment
+variable is not being used. Check that you have these files, and that
+you are in the same directory as them, or they are in the directory
+specified by PEWPATH.
+
+\item[Cannot record macro when already busy recording]\mbox{}\\
+You attempted to begin recording a keystroke macro while one was
+already busy being recorded. Keystroke macros cannot be nested.
+
+\item[Cannot play back macro while recording]\mbox{}\\
+You attempted to play back a keystroke macro while busy recording
+one.
+
+\item[Cannot assign macro to this key]\mbox{}\\
+Keystroke macros can only be assigned to the keys {\em Alt-0}
+through {\em Alt-9}.
+
+\item[Macro exceeds maximum length ({\em n} keys)]\mbox{}\\
+You exceeded the keystroke macro buffer size (currently 128
+keystrokes).
+\end{description}
+
+\subsection[Compiler Error Messages]{Compiler Error Messages}
+
+\begin{description}
+\item[Ambiguous identifier]\mbox{}\\
+You declared an identifier that has already been declared.
+
+\item[Assignment incompatibility]\mbox{}\\
+You are attempting an assignment of incompatible types.
+
+\item[Bad comment]\mbox{}\\
+You have not terminated a comment; the end of the file was reached
+while still in the comment.
+
+\item[Incompatible Types]\mbox{}\\
+You are attempting to operate on types that are not compatible.
+
+\item[Redefinition of Function's Parameters]\mbox{}\\
+You have already declared the types of the function's parameters in
+an earlier forward declaration.
+
+\item[Invalid Integer]\mbox{}\\
+You have used an integer constant which is out of the range --32768..+32767.
+
+\item[Invalid Label Reference]\mbox{}\\
+You have a GOTO to an undefined or invalid label.
+
+\item[Invalid String]\mbox{}\\
+A non-printable character was reached before the end of the string.
+You may not have terminated the string properly.
+
+\item[Invalid Assignment to Function Variable]\mbox{}\\
+You cannot assign to the function variable at this scope level.
+
+\item[Set Element Out of Range]\mbox{}\\
+All set elements must have values in the range 0..63. This means,
+for example, that sets of alphabetic characters are not allowed.
+
+\item[Invalid Time Unit]\mbox{}\\
+Valid timescales are HOURS, MINUTES, SECONDS, MILLISECONDS and
+MICROSECONDS.
+
+\item[Missing Queue Discipline - No Default]\mbox{}\\
+You declared an interaction point without a queue discipline, and
+no default queue discipline has been specified.
+
+\item[Missing System Class]\mbox{}\\
+You declared a module with body transitions but no process or
+activity attribute.
+
+\item[Too many labels]\mbox{}\\
+You have exceeded the allowed number of labels.
+
+\item[Too Many Levels]\mbox{}\\
+You have exceeded the allowed number of scope levels.
+
+\item[Invalid Ordinal Type]\mbox{}\\
+An ordinal type was expected where some other type was used.
+
+\item[Invalid Pointer Type]\mbox{}\\
+A pointer type was expected where some other type was used.
+
+\item[Redefinition of Procedure's Parameters]\mbox{}\\
+You have already declared the types of the procedure's parameters in
+an earlier forward declaration.
+
+\item[Invalid Index Range]\mbox{}\\
+A value which was out of the legal range was found. You may be
+assigning an integer to a variable which is of some subrange or
+enumeration type.
+
+\item[Case Constant Repeated]\mbox{}\\
+You have used a case constant more than once within the same case
+statement.
+
+\item[Role Repeated in Role List]\mbox{}\\
+You have used the same role twice in a single role list.
+
+\item[Invalid Type for Selector]\mbox{}\\
+The case selector constant expression is of a different type to the
+case selector index expression.
+
+\item[Invalid Signed Constant]\mbox{}\\
+Only integers may be signed; you have used a unary minus with some
+other type.
+
+\item[State Definition Repeated]\mbox{}\\
+You have already had a state-definition part in the current set of
+declarations; you may not have two.
+
+\item[Invalid Type]\mbox{}\\
+You have used a type in an inappropriate place.
+
+\item[Undefined Identifier]\mbox{}\\
+You have referenced an identifier that has not previously been
+declared.
+
+\item[Invalid Assignment to Control Variable]\mbox{}\\
+You may not assign to loop control variables within loops.
+
+\item[Invalid Non-local Control Variable]\mbox{}\\
+Loop control variables must be local variables.
+
+\item[Invalid Control Variable]\mbox{}\\
+The variable you are using to control a loop is of an inappropriate
+type.
+
+\item[Label Reference Unresolved in Block]\mbox{}\\
+You have a GOTO to a label which is never defined.
+
+\item[Case index out of range]\mbox{}\\
+You have used a case constant expression which is out of the
+allowed range 0..255.
+
+\item[Duplicate clause type in transition]\mbox{}\\
+You have more than one clause of the same type associated
+with the same transition block.
+
+\item[ANY clause not implemented]\mbox{}\\
+The ANY clause is not implemented in Version 1.2 of the {\em PEW}.
+
+\item[ANY constants not implemented]\mbox{}\\
+ANY constants must be of simple types. The PEW will compile a 
+specification using ANY constants as thought the smallest
+non-negative allowed value for the ANY constant was specified,
+or if this is not possible, the largest negative value.
+
+\item[... types not implemented]\mbox{}\\
+The {\em PEW} only allows complete specifications that are
+executable; ... types are thus not allowed.
+
+\item[Dispose with tags not implemented]\mbox{}\\
+Only the basic form of {\tt DISPOSE} is allowed; the variant form
+is not implemented.
+
+\item[EXTERNAL not implemented]\mbox{}\\
+The {\em PEW} only allows complete specifications that are
+executable; {\tt EXTERNAL} functions and procedures are thus not allowed.
+
+\item[Functional parameters not implemented]\mbox{}\\
+Functional parameters have not been implemented in Version 1.0 of the {\em PEW}.
+
+\item[NEW with tags not implemented]\mbox{}\\
+Only the basic form of {\tt NEW} is allowed; the variant form
+is not implemented.
+
+\item[Packed types not implemented]\mbox{}\\
+The {\em PEW} does not support type packing.
+
+\item[PRIMITIVE not implemented]\mbox{}\\
+The {\em PEW} only allows complete specifications that are
+executable; {\tt PRIMITIVE} functions and procedures are thus not allowed.
+
+\item[Procedural parameters not implemented]\mbox{}\\
+Procedural parameters have not been implemented in Version 1.0 of the {\em PEW}.
+
+\item[Record type expected in WITH statement]\mbox{}\\
+The identifier following {\tt WITH} is not a record.
+
+\item[Estelle construct illegal in procedure/function]\mbox{}\\
+You have used an Estelle construct that is prohibited within Pascal
+functions and procedures.
+
+\item[GOTO illegal in current context]\mbox{}\\
+GOTOs are only allowed within procedures and functions.
+
+\item[Illegal module variable reference]\mbox{}\\
+You have used a module variable in a context where it may not be
+used.
+
+\item[Identifier expected]\mbox{}\\
+The compiler expected an identifier but got something else.
+
+\item[Integer expected]\mbox{}\\
+The compiler expected an integer but got something else.
+
+\item[TO or DOWNTO expected]\mbox{}\\
+The keyword {\tt TO} or {\tt DOWNTO} was expected as the compiler
+is processing a {\tt FOR} loop.
+
+\item[Bad factor in expression]\mbox{}\\
+You have an illegitimate identifier reference in an expression.
+
+\item[Bad constant]\mbox{}\\
+A constant was expected but not found.
+
+\item[Bad formal parameter syntax]\mbox{}\\
+A syntax error in a formal parameter list occurred.
+
+\item[Clause or BEGIN expected]\mbox{}\\
+The compiler expected a transition but got something else.
+
+\item[Syntax error]\mbox{}\\
+Some kind of syntax error occurred.
+
+\item[Incompatible roles in CONNECT or ATTACH]\mbox{}\\
+To {\tt ATTACH} two interaction points, they must have the same
+roles. To {\tt CONNECT} two interaction points, they must have
+opposite roles. You violated one of these rules.
+
+\item[Syntax error: ';' expected]
+\item[Syntax error: ':' expected]
+\item[Syntax error: ')' expected]
+\item[Syntax error: '(' expected]
+\item[Syntax error: comma expected]
+\item[Syntax error: END expected]
+\item[Syntax error: DO expected]
+\item[Syntax error: '[' expected]
+\item[Syntax error: '.' expected]
+\item[Syntax error: ']' expected]
+\item[Syntax error: OF expected]\mbox{}\\
+These are all self-explanatory errors, and are special cases of the
+general `Syntax Error' error.
+
+\item[Out of symbol table space]\mbox{}\\
+The specification you are attempting to compile has exhausted the
+symbol table space. Try to reduce the number of declarations you
+have. Eliminate type declarations that are only used once, and add
+type declaractions where these are implicit and used several times.
+
+\item[String store overflow]\mbox{}\\
+You have exhausted the string store for storing identifier names.
+Try to shorten the names of identifiers to save space.
+
+\item[Out of code space]\mbox{}\\
+You have exhausted the size of the code buffer.
+
+\item[Too many lines in source program]\mbox{}\\
+Version 1.x of the PEW allows a maximum of 5000 source lines in
+a single specification.
+
+\item[Invalid type for exported variable]\mbox{}\\
+You have declared an exported variable which is not a Pascal
+variable type.
+
+\item[Expected an exported variable reference]\mbox{}\\
+An exported variable reference was found by the compiler, but the
+variable referenced is not an exported variable.
+
+\item[Expected module type or ordinal type in EXIST, FORONE or ALL]\mbox{}\\
+An inappropriate identifier was used in one of these constructs.
+
+\item[Only a single module variable allowed in EXIST, FORONE or ALL]\mbox{}\\
+Module domains for these constructs may have only a single module
+variable.
+
+\item[Illegal mix of module and ordinal types in EXIST, FORONE or ALL]\mbox{}\\
+These constructs allow both module and ordinal types, but not
+simultaneously.
+
+\item[Too many identifiers in domain list in EXIST, ALL or FORONE]\mbox{}\\
+You have exceeded the maximum allowed length of a domain list.
+
+\item[Illegal operation for pointer types]\mbox{}\\
+You have attempted an operation on pointer types that is not
+permitted.
+
+\item[Illegal clause type in initialisation transition]\mbox{}\\
+Initialisation transitions may only have {\tt TO} and {\tt
+PROVIDED} clauses.
+
+\item[Maximum number ({\em val}) of unique named transitions exceeded]\mbox{}\\
+The PEW keeps track of the firing frequencies of all named transitions
+for use in the ANALYSIS menu's dependent expression evaluator. As
+space must be reserved for this data, there is a limit on how many named
+transitions are permitted in a specification.
+
+\item[Interaction {\em name} has no associated OUTPUT statement]\mbox{}\\
+This interaction is used in WHEN clause(s) but does not occur in
+any OUTPUT statements. The transition(s) that refer to it can thus
+never be enabled, and are redundant.
+
+\item[Interaction {\em name} has no associated WHEN clause]\mbox{}\\
+This interaction is used in OUTPUT statement(s) but is never used
+in any WHEN clauses. This is a potential deadlock situation due
+to the strict FIFO nature of Estelle's queues.
+
+\item[Interaction {\em name} is not referenced]\mbox{}\\
+This interaction is never used in any WHEN clause or OUTPUT statement.
+
+\item[State `{\em name}' is unreachable]\mbox{}\\
+This state never occurs in a TO clause or a FROM..TO SAME clause pair.
+Thus it is not possible for it to ever be reached. This is not an error,
+but the state is redundant.
+
+\item[State `{\em name}' is a deadlock state]\mbox{}\\
+If this state is reached, it can never be left, as there are no FROM
+clauses that are enabled in this state. The prescence of such a
+state indicates a design error in your specification.
+
+\item[Bad nesting of clauses]\mbox{}\\
+You have badly nested clauses in the current transition. Specifically,
+you have used a clause type that is already on the stack of clauses
+for this transition.
+
+\item[Line {\em n}: (E{\em m}) Interaction in OUTPUT may not have a priority]\mbox{}\\
+
+This interaction is not associated with a priority-queueing channel
+type.
+
+\item[Line {\em n}: (E{\em m}) OUTPUT interaction cannot have a propogation delay]\mbox{}\\
+
+This interaction is not associated with a FIFO-queueing channel type.
+
+\end{description}
+
+
+\subsection[Interpreter/Debugger Error Messages]{Interpreter/Debugger
+Error Messages}
+
+\begin{description}
+\item[Cannot open log file]\mbox{}\\
+The {\em PEW} failed to open the file {\tt ESTELLE.LOG}. You may
+have some other application running, or your disk may be full. If you
+are running from a floppy disk, you may have a write-protect sticker
+on your disk.
+
+\item[Expression value in CASE statement has no corresponding label]\mbox{}\\
+You have not dealt explicitly with each possible case for the case
+statement index expression type. 
+
+\item[Attempt to dequeue nonexistent interaction]\mbox{}\\
+This is an internal error. It should never occur.
+
+\item[Attempt to output interaction to unconnected IP]\mbox{}\\
+You have attempted to execute an {\tt OUTPUT} statement to an
+unbound interaction point.
+
+\item[Attempt to execute illegal instruction ({\em n}) at code offset {\em o}]\mbox{}\\
+This is an internal error. It can only occur if stack overflow
+occurred but was never detected. It is unlikely to ever happen.
+
+\item[Stack overflow]\mbox{}\\
+A process's stack has exceeded its bounds. Process stacks are
+usually expanded dynamically as required, unless the process performs
+dynamic memory allocation using {\tt NEW}, at which point the stack
+is expanded by 1000 words and then frozen in size.
+
+\item[Attempt to expand process stack failed]\mbox{}\\
+As mentioned above, process stacks are expanded dynamically as
+required. If this fails, it is due to either low memory or the stack
+becoming too big ($\geq$32kB).
+
+\item[Index or value {\em val} out of range {\em val}\dots{\em val}]\mbox{}\\
+A variable of some ordinal type has exceeded its allowed range of
+values.
+
+\item[Attempt to connect an already connected interaction point]\mbox{}\\
+An interaction point that is already bound was referenced in a {\tt
+CONNECT} statement.
+
+\item[Attempt to attach a bound interaction point]\mbox{}\\
+An interaction point that is already bound was referenced in a {\tt
+ATTACH} statement.
+
+\item[Too many failed WHEN clauses in process]\mbox{}\\
+As the {\em PEW} checks for interactions that cannot be dealt with,
+it maintains data structures for this purpose. You are attempting to
+execute a specification which exceeds the available data structure
+space for this purpose.
+
+\item[NEW failed to allocate heap memory]\mbox{}\\
+An attempt to dynamically allocate memory failed because the
+request was too large or the stack is close to overflowing.
+
+\item[Attempt to DISPOSE illegal memory block]\mbox{}\\
+An attempt to dispose a memory block that is not a currently valid
+memory block allocated by {\tt NEW} was made. It is likely that you
+have never done a {\tt NEW} on this pointer before calling {\tt
+DISPOSE}.
+
+\item[No breakpoint corresponding to this number]\mbox{}\\
+A reference to a non-existent breakpoint was made.
+
+\item[Division by zero]\mbox{}\\
+The next divide instruction to be executed by the PEW has a 
+zero-valued denominator.
+\end{description}
+
+\subsection[Memory Allocation Failure Messages]{Memory Allocation Failure
+Messages}
+
+\begin{description}
+\item[Failed to allocate interaction]\mbox{}\\
+
+\item[Failed to allocate a module entry]\mbox{}\\
+
+\item[Failed to allocate a transition sequence table]\mbox{}\\
+
+\item[Failed to allocate a module stack]\mbox{}\\
+
+\item[Failed to allocate a module variable table]\mbox{}\\
+
+\item[Failed to allocate an IP table]\mbox{}\\
+
+\item[Failed to allocate a common queue]\mbox{}\\
+
+\item[Failed to allocate a reception queue]\mbox{}\\
+
+\item[Failed to allocate a transition table]\mbox{}\\
+
+\item[Line {\em n}: (E{\em m}) Failed to allocate symbol table memory block]\mbox{}\\
+
+\item[Line {\em n}: (E{\em m}) Failed to allocate compiler code buffer]\mbox{}\\
+
+\item[Line {\em n}: (E{\em m}) Too many transitions in process]\mbox{}\\
+
+The number of transitions in a process is limited to 64.
+\end{description}
+
+\newpage
+\appendix
+\section[The {\em PEW} Estelle Implementation]{The {\em PEW} Estelle
+Implementation}
+
+This section gives a short summary of how the
+implementation of Estelle in the {\em PEW} differs from the Draft
+International Standard.
+
+The following restrictions apply to the {\em PEW}:
+
+\begin{enumerate}
+\item {\tt REAL} and {\tt PACKED} data types are not supported.
+\item The {\tt ANY} clause is not supported.
+\item The {\tt NEW} and {\tt DISPOSE} standard procedures do not
+allow the variant forms.
+\item Partial specifications are not supported; i.e., {\tt
+PRIMITIVE} and {\tt EXTERNAL} functions and procedures and {\tt ANY} types.
+\item Procedures and functions may not be passed as parameters.
+\end{enumerate}
+In addition, the compiler performs no purity checking of procedures
+and functions. The keyword {\tt PURE} is ignored, and it is assumed
+that the user takes responsibility for purity checking. 
+
+The restriction in the standard of {\tt WHEN} and {\tt
+DELAY} clauses being mutually exclusive is not enforced by the {\em
+PEW} compiler. Instead, the combination is treated as follows: the
+{\tt WHEN} clause must be continuously satisfied for the duration of 
+the delay for the transition to be offered for execution. If at any stage 
+during the delay the {\tt WHEN} clause is no longer satisfied, then the 
+delay timer associated with the transition is reset.
+
+Additions to the {\em PEW} include:
+
+\begin{enumerate}
+\item {\tt READ}, {\tt WRITE} and {\tt
+WRITELN} procedures for integer, character and string variables and
+constants. Fieldwidths are not supported. All I/O is directed to a
+pop-up window which can be viewed at any time in the interpreter by
+pressing {\em F7}. This can be overridden using a compiler directive
+as follows:
+\begin{itemize}
+\item \{\$o0\} -- disable all output
+\item \{\$o1\} -- send output to log file only
+\item \{\$o2\} -- send output to window only (default)
+\item \{\$o3\} -- send output to both log file {\em and} window
+\end{itemize}
+It should be noted that this compiler directive generates an e-code
+instruction at the point where it occurs, so placement is important.
+The advantage of generating an instruction is that different WRITE
+statements can have different destinations. Once such an
+instruction is processed, all WRITE statements will be subject to it
+until the next such instruction is processed.
+
+It should also be noted that when logging ({\em F8}) is turned on,
+then the default is to send output to both the log file and the
+window.
+\item  A {\tt RANDOM} function has been added to generate random numbers.
+This takes a single positive integer argument {\em n} and returns a
+pseudo-random number in the range 0..{\em n}--1.
+\item A {\tt GLOBALTIME} function has been added which returns the
+current simulation time.
+\item A {\tt FIRECOUNT} function has been added which returns the
+number of times the containing transition has been executed.
+\item A {\tt QLENGTH} function has been added which returns the
+length of the reception queue of an interaction point. The
+interaction point must be specified as an argument to the function.
+\item {\tt OUTPUT} statements may be preceded by a compiler directive to 
+specify	their reliability. For example {\tt \{\$R95\} OUTPUT...} specifies an
+{\tt OUTPUT} statement that is 95\% reliable. This reliability applies
+only for a single {\tt OUTPUT} statement, after which it is reset to
+100\%.
+\item The {\em PEW} detects interactions at the head of IP queues
+that cannot be dealt with and discards these. Each time this occurs,
+a message is written to the log file detailing the occurence. This
+helps to check whether all possible interactions have been catered
+for.
+\item The {\em PEW} compiler detects unused and unreachable states,
+interactions that can be sent but never received, or transitions that
+are only enabled upon reception of interactions that are never sent.
+Thus a reasonable degree of static validation is performed.
+\item The {\em PEW} compiler allows the use of {\tt ANY} constants.
+It uses the smallest possible positive value for such a constant, if
+possible; otherwise the largest value is used.
+Thus, ANY 10..20 will be treated as 10, ANY -10..10 will be treated
+as zero, and ANY -20..-10 will be treated as -10. 
+\item The {\em PEW} allows uniform, exponential, geometric and Poisson delay
+distributions. Selecting between these is discussed in
+Section~\ref{execenv}.
+\item Normally, a {\tt WRITE} or {\tt WRITELN} statement directed at
+the pop-up I/O window results in a short pause for you to examine the
+result before execution proceeds. This can be disabled and enabled at
+different points by using the {\em fast write} compiler directives
+{\tt \{\$F--\}} and {\tt \{\$F+\}}.
+\item The execution log contains transition sequence count and transition
+sequence delay matrices for each process. In some cases, we may wish
+to restrict attention to a subset of the transitions in a process.
+This can be achieved to a limited extent by use of the {\tt \{\$T\}}
+directive, which may be used once per module, and divides the
+module's transitions up into two separate groups.
+\item In Estelle, interactions are queued in FIFO order. This can be
+overridden in the {\em PEW} by use of the {\tt \{\$QR\}} (random
+queueing) and {\tt \{\$QP\}} (priority queueing) directives. These
+directives affect the next channel type declaration, after which FIFO
+queueing once again becomes the default. When declaring a channel
+type, priorities are assigned sequentially to each set of
+interactions declared, starting with zero (the highest priority). The
+current priority value can be set to a specific value by using the
+{\tt \{\$S{\em value}\}} directive. An example will help to
+illustrate this:
+
+\begin{verbatim}
+{$QP Select priority queueing}
+
+CHANNEL prot_prov_chan(prot_role, prov_role);
+    BY prot_role, prov_role:
+        {** REJ frames have highest priority **}
+        REJ(sv:seq_type; rv:seq_type);
+        {** RR frames have priority 1 **}
+        RR(sv:seq_type; rv:seq_type);
+        {** RNR has same priority as RR **}
+        {$S1} RNR(sv:seq_type; rv:seq_type);
+        { I frames have priority 2 which is the lowest }
+        I(sv:seq_type; rv:seq_type; data:data_type;crc:crc_type);
+\end{verbatim}
+
+\item A propogation delay can be associated with an interaction point
+by preceding the IP declaration with the directive {\tt \{\$D{\em
+value}\}}. Interactions output through the IP will be timestamped,
+and may only be dequeued when the global time exceeds their arrival
+time. This facility is only supported for IPs that use FIFO queueing.
+\end{enumerate}
+
+\newpage
+\section[An Overview of Estelle]{An Overview of Estelle}
+
+\input{estelle.tex}
+
+\newpage
+\section[Evaluation and Bug Report]{Evaluation and Bug Report}
+As the  {\em PEW} is  still under development, it would be appreciated
+if you could complete this form and return it to Graham Wheeler,
+DNA Laboratory, at the address on the front of this manual.
+All constructive criticism is welcomed.
+
+I liked the following features of the {\em PEW}:
+
+\vspace{8cm}
+
+I disliked the following features of the {\em PEW}:
+
+\vspace{8cm}
+
+I would like to see the following features added:
+\newpage
+I experienced  the following  bugs (please specify if the bug is
+repeatable, what  circumstances caused  it,  what  the  symptoms
+where, and how fatal it was):
+\end{document}
+
+

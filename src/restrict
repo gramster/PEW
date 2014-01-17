@@ -1,0 +1,7 @@
+Packed data types are not supported.
+No PURE checking is performed
+The ANY clause is not supported.
+The NEW standard procedure does not allow the variant form (same for
+DISPOSE).
+
+

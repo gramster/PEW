@@ -1,0 +1,688 @@
+SPECIFICATION abracadabra;
+DEFAULT INDIVIDUAL QUEUE;
+TIMESCALE SECONDS;
+
+{ November 10, 1986
+ by					    Richard Tenney
+  Tom Blumer				    National Bureau of Standards
+  Protocol Development Corporation	    University of Massachusetts
+  1330 Beacon St., Suite 320	      and   70 Bow Road
+  Brookline, MA	 02146	 USA		    Belmont, MA 02178   USA
+  617-354-8558				    617-484-7600
+
+ Modifications, including User and physical layer processes
+ added by Gram in November 1990.
+}
+
+{This diagram shows modules and interaction points defined in this specification.
+
+    ---------------------		   ---------------------
+    |		        |		   |		       |
+    |	 module	        |		   |    module	       |
+    |	 User A	        |		   |    User B	       |
+    |		        |		   |		       |
+    -------ip U----------		   -------ip U----------
+	     ^					   ^
+	     |					   |
+	     |					   |
+	     v					   v
+    -------ip U----------		   -------ip U----------
+    |		        |		   |		       |
+    |	 module	        |		   |    module	       |
+    |	 Station A      |		   |    Station B      |
+    |		        |		   |		       |
+    -------ip P ---------		   -------ip P ---------
+	     ^					   ^
+	     |					   |
+	     |					   |
+	     v					   v
+    -------ip phys[1] ---------------------------ip phys[2] ----
+    |							       |
+    |			   module phys			       |
+    |							       |
+    |							       |
+    ------------------------------------------------------------
+
+}
+
+{ In addition to the written description of the Abracadabra protocol
+  the following assumptions were made:
+  1. Retransmission of CR stops if the CR sender issues DisReq,
+     or receives CR or CC or DR.
+  2. Retransmission of DT stops if the DT sender issues DisReq,
+     or receives DR, or enters the error phase.
+  3. User protocol errors are ignored.
+}
+
+  CONST
+    N = {any integer} 10;	 { no. of retransmission attempts }
+    P = {any integer} 20;	 { delay amount for timers }
+
+  TYPE seq_type = 0..1;	    { sequence number type }
+       user_data_type = INTEGER {...};
+       node_type = 1..2;
+
+  {********************** Channels **************************}
+
+  CHANNEL USAP(user, provider);
+    BY user:
+      ConReq;
+      ConResp;
+      DatReq(user_data : user_data_type);
+      DisReq;
+    BY provider:
+      ConInd;
+      ConConf;
+      DatInd(user_data : user_data_type);
+      DisInd;
+
+  CHANNEL NSAP(user, provider);
+    BY user, provider:
+      CR;
+      CC;
+      DT(seq : seq_type; user_data : user_data_type);
+      AK(seq : seq_type);
+      DR;
+      DC;
+
+  {********************** User Process **************************}
+
+  MODULE user_head SYSTEMPROCESS (id:INTEGER);
+    IP U : USAP(user);
+  END;
+
+  { The user process can send:
+        ConReq  to request a connection
+        DisReq  to request a disconnection or refuse a connection request
+        ConResp to accept a connection request
+        DatReq  to send a packet
+
+    The user process can receive:
+        ConConf to confirm successful connection
+        DisInd  if connection refused
+        ConInd  if remote requests connection
+        DatInd  to receive a packet
+  }
+
+  BODY user_body FOR user_head;
+  STATE
+        NORMAL, DISC, SETUP, WAIT;
+  VAR
+        FileSize, SentBytes, ReceivedBytes: INTEGER;
+  INITIALIZE
+        TO DISC
+	        PROVIDED id=1
+		        BEGIN
+			        WRITELN('ID ',id);
+			        FileSize:=RANDOM(10000)+1280;
+			        WRITELN('Sending File of ',FileSize,' bytes');
+		        END;
+	        PROVIDED OTHERWISE
+		        BEGIN
+			        WRITELN('ID ',id);
+			        FileSize := 0;
+			        ReceivedBytes := 0;
+		        END;
+  TRANS
+        FROM DISC TO SETUP
+	        PROVIDED (FileSize>0) AND (id=1)
+		        BEGIN
+			        OUTPUT U.ConReq;
+		        END;
+        FROM SETUP TO NORMAL
+	        WHEN U.ConConf
+		        BEGIN
+		        END;
+        FROM NORMAL TO WAIT
+	        PROVIDED (FileSize=0) AND (id=1)
+		        BEGIN
+			        WRITELN('Send all bytes - request disconnect');
+			        OUTPUT U.DisReq;
+		        END;
+        FROM SETUP, WAIT TO DISC
+	        WHEN U.DisInd
+		        BEGIN
+		        END;
+        FROM DISC TO SETUP
+	        WHEN U.ConInd
+		        BEGIN
+			        OUTPUT U.ConResp;
+		        END;
+        FROM NORMAL
+	        WHEN U.DatInd
+		        BEGIN
+			        ReceivedBytes := ReceivedBytes + user_data;
+			        WRITELN('Received ',user_data,' bytes');
+		        END;
+        FROM NORMAL
+	        PROVIDED FileSize>0
+		        BEGIN
+			        IF (FileSize>128) THEN BEGIN
+				        FileSize := FileSize-128;
+				        OUTPUT U.DatReq(128);
+			        END
+			        ELSE BEGIN
+				        OUTPUT U.DatReq(FileSize);
+				        FileSize := 0;
+			        END
+		        END;
+
+  END;
+
+  {********************** Physical Layer **************************}
+
+  MODULE phys_head SYSTEMPROCESS;
+    IP phys : ARRAY[node_type] OF NSAP(provider);
+  END;
+
+  BODY phys_body FOR phys_head;
+  CONST
+        Phys_Delay = 4;
+
+  STATE NN, NB, BN, BB;
+  INITIALIZE
+        TO NN
+	        BEGIN
+	        END;
+  TRANS
+  PRIORITY 0
+        FROM NN TO BN
+	        WHEN phys[1].CR
+	        BEGIN
+		        {$R90} OUTPUT phys[2].CR
+	        END;
+	        WHEN phys[1].CC
+	        BEGIN
+		        {$R90} OUTPUT phys[2].CC
+	        END;
+	        WHEN phys[1].DT
+	        BEGIN
+		        {$R90} OUTPUT phys[2].DT(seq,user_data);
+	        END;
+	        WHEN phys[1].AK
+	        BEGIN
+		        {$R90} OUTPUT phys[2].AK(seq)
+	        END;
+	        WHEN phys[1].DR
+	        BEGIN
+		        {$R90} OUTPUT phys[2].DR
+	        END;
+	        WHEN phys[1].DC
+	        BEGIN
+		        {$R90} OUTPUT phys[2].DC
+	        END;
+        FROM NB TO BB
+	        WHEN phys[1].CR
+	        BEGIN
+		        {$R90} OUTPUT phys[2].CR
+	        END;
+	        WHEN phys[1].CC
+	        BEGIN
+		        {$R90} OUTPUT phys[2].CC
+	        END;
+	        WHEN phys[1].DT
+	        BEGIN
+		        {$R90} OUTPUT phys[2].DT(seq,user_data);
+	        END;
+	        WHEN phys[1].AK
+	        BEGIN
+		        {$R90} OUTPUT phys[2].AK(seq)
+	        END;
+	        WHEN phys[1].DR
+	        BEGIN
+		        {$R90} OUTPUT phys[2].DR
+	        END;
+	        WHEN phys[1].DC
+	        BEGIN
+		        {$R90} OUTPUT phys[2].DC
+	        END;
+
+        FROM NN TO NB
+	        WHEN phys[2].CR
+	        BEGIN
+		        {$R90} OUTPUT phys[1].CR
+	        END;
+	        WHEN phys[2].CC
+	        BEGIN
+		        {$R90} OUTPUT phys[1].CC
+	        END;
+	        WHEN phys[2].DT
+	        BEGIN
+		        {$R90} OUTPUT phys[1].DT(seq,user_data);
+	        END;
+	        WHEN phys[2].AK
+	        BEGIN
+		        {$R90} OUTPUT phys[1].AK(seq);
+	        END;
+	        WHEN phys[2].DR
+	        BEGIN
+		        {$R90} OUTPUT phys[1].DR
+	        END;
+	        WHEN phys[2].DC
+	        BEGIN
+		        {$R90} OUTPUT phys[1].DC
+	        END;
+
+        FROM BN TO BB
+	        WHEN phys[2].CR
+	        BEGIN
+		        {$R90} OUTPUT phys[1].CR
+	        END;
+	        WHEN phys[2].CC
+	        BEGIN
+		        {$R90} OUTPUT phys[1].CC
+	        END;
+	        WHEN phys[2].DT
+	        BEGIN
+		        {$R90} OUTPUT phys[1].DT(seq,user_data);
+	        END;
+	        WHEN phys[2].AK
+	        BEGIN
+		        {$R90} OUTPUT phys[1].AK(seq);
+	        END;
+	        WHEN phys[2].DR
+	        BEGIN
+		        {$R90} OUTPUT phys[1].DR
+	        END;
+	        WHEN phys[2].DC
+	        BEGIN
+		        {$R90} OUTPUT phys[1].DC
+	        END;
+PRIORITY 1
+        FROM NB, BN, BB TO NN
+	        DELAY (Phys_Delay)
+		        BEGIN
+		        END;
+END;
+
+  {********************** Protocol Layer **************************}
+
+  MODULE station_head SYSTEMPROCESS;
+    IP U  : USAP(provider);
+       CM : NSAP(user);
+  END;
+
+  BODY station_body FOR station_head;
+
+    STATE CLOSED, CR_SENT, CR_RECV, ESTAB, DR_SENT;
+
+    STATESET CR_ignore = [CR_RECV, DR_SENT];
+	     CC_ignore = [CLOSED, CR_RECV, DR_SENT];
+	     DT_ignore = [CLOSED, CR_SENT, CR_RECV, DR_SENT];
+	     AK_ignore = [CLOSED, CR_SENT, CR_RECV, DR_SENT];
+	     DC_ignore = [CLOSED, CR_SENT, CR_RECV];
+
+	    ConReq_ignore  = [CR_SENT, CR_RECV, ESTAB, DR_SENT];
+	    ConResp_ignore = [CLOSED, CR_SENT, ESTAB, DR_SENT];
+	    DatReq_ignore  = [CLOSED, CR_SENT, CR_RECV, DR_SENT];
+	    DisReq_ignore  = [CLOSED, DR_SENT];
+
+    VAR
+      sending : BOOLEAN;
+      send_seq, recv_seq : seq_type;
+      old_send_seq : seq_type;
+      CR_retran_remaining : INTEGER;
+      DT_retran_remaining : INTEGER;
+      DR_retran_remaining : INTEGER;
+      old_data : user_data_type;
+      DT_or_AK : BOOLEAN;
+
+    PROCEDURE init_var;
+    BEGIN
+      sending := FALSE;
+      send_seq := 0;
+      recv_seq := 0;
+      CR_retran_remaining := -1;
+      DT_retran_remaining := -1;
+      DR_retran_remaining := -1;
+      DT_or_AK := FALSE;
+    END;
+
+    INITIALIZE
+      TO CLOSED
+        BEGIN { 1 }
+	  { variables are INITIALIZEd WHEN leaving CLOSED state,
+	    since the protocol module may cycle through CLOSED repeatedly }
+        END;
+
+    TRANS
+
+{ *** Connection Phase *** }
+
+      { user requests connection }
+      FROM CLOSED TO CR_SENT
+        WHEN U.ConReq
+	  BEGIN { 2 }
+	    { INITIALIZE module variables WHEN leaving CLOSED }
+	    init_var;
+	    OUTPUT CM.CR;
+	    CR_retran_remaining := N;
+	  END;
+
+      { other user accepted connection }
+      FROM CR_SENT TO ESTAB
+        WHEN CM.CC
+	  BEGIN { 3 }
+	    OUTPUT U.ConConf;
+	    CR_retran_remaining := -1;
+	  END;
+
+      { colliding CRs }
+      FROM CR_SENT TO ESTAB
+        WHEN CM.CR
+	  BEGIN { 4 }
+	    OUTPUT U.ConConf;
+	    CR_retran_remaining := -1;
+	  END;
+
+      { other user rejected connection }
+      FROM CR_SENT TO CLOSED
+        WHEN CM.DR
+	  BEGIN { 5 }
+	    OUTPUT U.DisInd;
+	    OUTPUT CM.DC;
+	    CR_retran_remaining := -1;
+	  END;
+
+      { sender requests disconnection }
+      FROM CR_SENT TO DR_SENT
+        WHEN U.DisReq
+	  BEGIN { 6 }
+	    OUTPUT CM.DR;
+	    CR_retran_remaining := -1;
+	    DR_retran_remaining := N;
+	  END;
+
+      { retransmission timer for CR fires }
+      FROM CR_SENT TO SAME
+        PROVIDED CR_retran_remaining > 0
+	  DELAY (P)
+	    BEGIN { 7 }
+	      CR_retran_remaining := CR_retran_remaining - 1;
+	      OUTPUT CM.CR;
+	    END;
+
+      { terminate retransmission of CR }
+      FROM CR_SENT TO DR_SENT
+        PROVIDED CR_retran_remaining = 0
+	  DELAY (P) { allow time for last CR }
+	    BEGIN { 8 }
+	      { enter error phase }
+	      OUTPUT U.DisInd;
+	      OUTPUT CM.DR;
+	      CR_retran_remaining := -1;
+	      DR_retran_remaining := N;
+	    END;
+
+      { receive connect request FROM peer entity }
+      FROM CLOSED TO CR_RECV
+        WHEN CM.CR
+	  BEGIN { 9 }
+	    { INITIALIZE module variables WHEN leaving CLOSED }
+	    init_var;
+	    OUTPUT U.ConInd;
+	  END;
+
+      { user accepts connection }
+      FROM CR_RECV TO ESTAB
+        WHEN U.ConResp
+	  BEGIN { 10 }
+	    OUTPUT CM.CC;
+	  END;
+
+      { user rejects connection }
+      FROM CR_RECV TO DR_SENT
+        WHEN U.DisReq
+	  BEGIN { 11 }
+	    OUTPUT CM.DR;
+	    DR_retran_remaining := N;
+	  END;
+
+      { other user disconnected }
+      FROM CR_RECV TO CLOSED
+        WHEN CM.DR
+	  BEGIN { 12 }
+	    OUTPUT U.DisInd;
+	    OUTPUT CM.DC;
+	  END;
+
+{ *** Data Transfer Phase *** }
+
+      { send data in DT PDU }
+      FROM ESTAB TO same
+        WHEN U.DatReq
+	  PROVIDED NOT sending
+	    BEGIN { 13 }
+	      old_data := user_data;
+	      OUTPUT CM.DT(send_seq, old_data);
+	      old_send_seq := send_seq;
+	      send_seq := (send_seq + 1) MOD 2;
+	      sending := TRUE;
+	      { turn on retransmission timer }
+	      DT_retran_remaining := N;
+	    END;
+
+      { receive acknowledgment with correct sequence no. in AK PDU }
+      FROM ESTAB TO SAME
+        WHEN CM.AK
+	  PROVIDED seq = send_seq
+	    BEGIN { 14 }
+	      sending := FALSE;
+	      { turn off retransmission timer }
+	      DT_retran_remaining := -1;
+	      DT_or_AK := TRUE;
+	    END;
+
+      { receive acknowledgment with incorrect sequence no. in AK PDU }
+      FROM ESTAB TO DR_SENT
+        WHEN CM.AK
+	  PROVIDED seq <> send_seq
+	    BEGIN { 15 }
+	      { enter error phase }
+	      OUTPUT U.DisInd;
+	      OUTPUT CM.DR;
+	      DT_or_AK := TRUE;
+	      DT_retran_remaining := -1;
+	      DR_retran_remaining := N;
+	    END;
+
+      { receive data in DT PDU }
+      FROM ESTAB TO SAME
+        WHEN CM.DT
+	  BEGIN { 16 }
+	    IF seq = recv_seq THEN
+	    BEGIN
+	      OUTPUT U.DatInd(user_data);
+	      recv_seq := (recv_seq + 1) MOD 2;
+	    END;
+	    { send AK with next expected seq no. }
+	    OUTPUT CM.AK(recv_seq);
+	    DT_or_AK := TRUE;
+	  END;
+
+      FROM ESTAB TO SAME
+        WHEN CM.CR
+	  PROVIDED NOT DT_or_AK
+	    BEGIN { 17 }
+	      OUTPUT CM.CC;
+	    END;
+
+      FROM ESTAB TO DR_SENT
+        WHEN CM.CR
+	  PROVIDED DT_or_AK
+	    BEGIN { 18 }
+	      { enter error phase }
+	      OUTPUT U.DisInd;
+	      OUTPUT CM.DR;
+	      DT_retran_remaining := -1;
+	      DR_retran_remaining := N;
+	    END;
+
+      FROM ESTAB TO DR_SENT
+        WHEN CM.CC
+	  BEGIN { 19 }
+	    { enter error phase }
+	    OUTPUT U.DisInd;
+	    OUTPUT CM.DR;
+	    DT_retran_remaining := -1;
+	    DR_retran_remaining := N;
+	  END;
+        WHEN CM.DC
+	  BEGIN { 20 }
+	    { enter error phase }
+	    OUTPUT U.DisInd;
+	    OUTPUT CM.DR;
+	    DT_retran_remaining := -1;
+	    DR_retran_remaining := N;
+	  END;
+
+      { retransmission timer for DT fires }
+      FROM ESTAB TO SAME
+        PROVIDED DT_retran_remaining > 0
+	  DELAY (P)
+	    BEGIN { 21 }
+	      DT_retran_remaining := DT_retran_remaining - 1;
+	      OUTPUT CM.DT(old_send_seq, old_data);
+	    END;
+
+      { terminate retransmission of DT }
+      FROM ESTAB TO DR_SENT
+        PROVIDED DT_retran_remaining = 0
+	  DELAY (P)
+	    BEGIN { 22 }
+	      { enter error phase }
+	      OUTPUT U.DisInd;
+	      OUTPUT CM.DR;
+	      DT_retran_remaining := -1;
+	      DR_retran_remaining := N;
+	    END;
+
+{ *** Disconnection Phase *** }
+
+      { receive disconnect request FROM user }
+      FROM ESTAB TO DR_SENT
+        WHEN U.DisReq
+	  BEGIN { 23 }
+	    OUTPUT CM.DR;
+	    DT_retran_remaining := -1;
+	    DR_retran_remaining := N;
+	  END;
+
+      { receive DC }
+      FROM DR_SENT TO CLOSED
+        WHEN CM.DC
+	  BEGIN { 24 }
+	    DR_retran_remaining := -1;
+	  END;
+
+      { receive DR }
+      FROM DR_SENT TO CLOSED
+        WHEN CM.DR
+	  BEGIN { 25 }
+	    DR_retran_remaining := -1;
+	  END;
+
+      { receive DR }
+      FROM ESTAB TO CLOSED
+        WHEN CM.DR
+	  BEGIN { 26 }
+	    OUTPUT U.DisInd;
+	    OUTPUT CM.DC;
+	    DT_retran_remaining := -1;
+	  END;
+
+      { reply TO retransmitted DR }
+      FROM CLOSED TO SAME
+        WHEN CM.DR
+	  BEGIN { 27 }
+	    OUTPUT CM.DC;
+	  END;
+
+      { retransmission timer for DR fires }
+      FROM DR_SENT TO SAME
+        PROVIDED DR_retran_remaining > 0
+	  DELAY (P)
+	    BEGIN { 28 }
+	      DR_retran_remaining := DR_retran_remaining - 1;
+	      OUTPUT CM.DR;
+	    END;
+
+      { terminate retransmission of DR }
+      FROM DR_SENT TO CLOSED
+        PROVIDED DR_retran_remaining = 0
+	  DELAY (P)
+	    BEGIN { 29 }
+	      { enter error phase }
+	      OUTPUT U.DisInd;
+	      OUTPUT CM.DR;
+	      DR_retran_remaining := -1;
+	    END;
+
+      { ignore other PDUs }
+      FROM CR_ignore TO SAME
+        WHEN CM.CR
+	  BEGIN { 30 }
+	  END;
+
+      FROM CC_ignore TO SAME
+        WHEN CM.CC
+	  BEGIN { 31 }
+	  END;
+
+      FROM DT_ignore TO SAME
+        WHEN CM.DT
+	  BEGIN { 32 }
+	  END;
+
+      FROM AK_ignore TO SAME
+        WHEN CM.AK
+	  BEGIN { 33 }
+	  END;
+
+      FROM DC_ignore TO SAME
+        WHEN CM.DC
+	  BEGIN { 34 }
+	  END;
+
+      FROM ConReq_ignore TO SAME
+        WHEN U.ConReq
+	  BEGIN { 35 }
+	  END;
+
+      FROM ConResp_ignore TO SAME
+        WHEN U.ConResp
+	  BEGIN { 36 }
+	  END;
+
+      FROM DatReq_ignore TO SAME
+        WHEN U.DatReq
+	  BEGIN { 37 }
+	  END;
+
+      FROM DisReq_ignore TO SAME
+        WHEN U.DisReq
+	  BEGIN { 38 }
+	  END;
+
+  END; { station_body }
+
+  MODVAR A,B   : station_head;
+	 UA,UB : user_head;
+	 CMS   : phys_head;
+
+  INITIALIZE
+  BEGIN { 1 }
+    INIT UA  WITH user_body(1);
+    INIT UB  WITH user_body(2);
+    INIT A   WITH station_body;
+    INIT B   WITH station_body;
+    INIT CMS WITH phys_body;
+    CONNECT UA.U TO A.U;
+    CONNECT UB.U TO B.U;
+    CONNECT A.CM TO CMS.phys[1];
+    CONNECT B.CM TO CMS.phys[2];
+  END;
+
+END.
+
+

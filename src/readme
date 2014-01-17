@@ -1,0 +1,21 @@
+This file contains notes about the PEW v1.2 that were too late for 
+inclusion in the User Manual.
+===================================================================
+
+The ANALYZE menu has a potential problem which may reveal itself when
+the demo is run. This problem has been tracked down to Turbo C's
+floating point emulation library, and is not a bug in the PEW
+itself. It manifests itself as occasional DIVIDE ERROR aborts, or
+just plain system lockups. Running the PEW on a system with a math
+coprocessor installed will eliminate this unreliability. For those
+who do not have a coprocessor, all I can suggest is try your example,
+and if it doesn't work, don't use dependent expressions. Rather let the
+PEW tabulate the fire counts of the relevant transitions, and then work
+out the expressions themselves.
+
+A compiler directive, $F{+|-} has been added, for `fast writes'. After
+processing a $F+ directive, all WRITEs and WRITELNs up to the next $F-
+or the end of the program, are fast writes. A fast write does not pop
+the I/O window up for the 1 second period that usually occurs. The user
+will have to explicitly call up the window with F7, unless a READ occurs.
+

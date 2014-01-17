@@ -1,0 +1,422 @@
+@0 MEMFAIL
+Memory allocation failure of %d * %d bytes (ID %d)
+
+@1 BADFREE
+Illegal attempt to free memory at %08lX
+
+@2 MEMTABLEFULL
+Out of memtable space for allocation of %d bytes at %08lX
+
+@3 NOSAVESCR
+Cannot save screen image
+
+@4 NOSHELL
+Cannot find COMMAND.COM
+
+@5 NOMEM
+Insufficient memory
+
+@6 BADSHELL
+Error while trying to execute COMMAND.COM: %d
+
+@7 BADINT
+Illegal input: integer value required
+
+@8 RECMACRO
+Cannot record macro when already busy recording
+
+@9 PLAYMACRO
+Cannot play back macro while recording
+
+@10 MACROKEY
+Cannot assign macro to this key
+
+@11 MACROLEN
+Macro exceeds maximum length (%d keys)
+
+@24 ENDLIBERRS
+Dummy entry - signifies end of library errors, start of application errors
+
+@25 BAD_ARGUMENT
+Illegal argument passed to function %s
+
+@26 NOOPENFL
+Cannot open file: %s
+
+@27 BADLINE
+Illegal input: line number out of range
+
+@28 BADTSTOP
+Illegal tabstop value
+
+@29 REPORT
+REPORT in %s
+
+@30 NOHLPINDX
+Cannot open help index file
+
+@31 NOHELPTEXT
+Cannot open help text file
+
+@32 AMBIGUOUS
+Line %05d: (E%03d) Ambiguous identifier
+
+@33 ASSIGNMENT
+Line %05d: (E%03d) Assignment incompatibility
+
+@34 COMMENT
+Line %05d: (E%03d) Bad comment
+
+@35 COMPATIBLE
+Line %05d: (E%03d) Incompatible Types
+
+@36 FUNC
+Line %05d: (E%03d) Redefinition of Function's Parameters
+
+@37 INTEGER
+Line %05d: (E%03d) Invalid Integer
+
+@38 LABEL
+Line %05d: (E%03d) Invalid Label Reference
+
+@39 STRING
+Line %05d: (E%03d) Invalid String
+
+@40 FUNCTION
+Line %05d: (E%03d) Invalid Assignment to Function Variable
+
+@41 SET
+Line %05d: (E%03d) Set Element Out of Range
+
+@42 TIME
+Line %05d: (E%03d) Invalid Time Unit
+
+@43 NODEFAULT
+Line %05d: (E%03d) Missing Queue Discipline - No Default
+
+@44 SYSTEMCLASS
+Line %05d: (E%03d) Missing System Class
+
+@45 LABELS
+Line %05d: (E%03d) Too many labels
+
+@46 LEVEL
+Line %05d: (E%03d) Too Many Levels
+
+@47 ORDINAL
+Line %05d: (E%03d) Invalid Ordinal Type
+
+@48 POINTER
+Line %05d: (E%03d) Invalid Pointer Type
+
+@49 PROC
+Line %05d: (E%03d) Redefinition of Procedure's Parameters
+
+@50 RANGE
+Line %05d: (E%03d) Invalid Index Range
+
+@51 REPETITION
+Line %05d: (E%03d) Case Constant Repeated
+
+@52 ROLES
+Line %05d: (E%03d) Role Repeated in Role List
+
+@53 SELECTORTYPE
+Line %05d: (E%03d) Invalid Type for Selector
+
+@54 SIGNED
+Line %05d: (E%03d) Invalid Signed Constant
+
+@55 STATES
+Line %05d: (E%03d) State Definition Repeated
+
+@56 TYPE
+Line %05d: (E%03d) Invalid Type
+
+@57 UNDEFINED
+Line %05d: (E%03d) Undefined Identifier %s
+
+@58 LOOPVAR
+Line %05d: (E%03d) Invalid Assignment to Control Variable
+
+@59 CONTROLVAR
+Line %05d: (E%03d) Invalid Non-local Control Variable
+
+@60 CONTROLPARAM
+Line %05d: (E%03d) Invalid Control Variable
+
+@61 UNRESOLVED
+Line %05d: (E%03d) Label Reference Unresolved in Block
+
+@62 INDICES
+Line %05d: (E%03d) Case index out of range
+
+@63 DUPCLAUSE
+Line %05d: (E%03d) Duplicate clause type in transition
+
+@64 SYMBOLSPC
+Out of symbol table space
+
+@65 SPECTOOBIG
+String store overflow
+
+@66 ANY
+Line %05d: (E%03d) ANY clause not implemented
+
+@67 ANYCONST
+Line %05d: (E%03d) ANY constants must be of simple types
+
+@68 ANYTYPE
+Line %05d: (E%03d) ... types not implemented
+
+@69 DISPOSE
+Line %05d: (E%03d) Dispose with tags not implemented
+
+@70 EXTERNAL
+Line %05d: (E%03d) EXTERNAL not implemented
+
+@71 FUNCPARAM
+Line %05d: (E%03d) Functional parameters not implemented
+
+@72 NEW
+Line %05d: (E%03d) NEW with tags not implemented
+
+@73 PACK
+Line %05d: (E%03d) Packed types not implemented
+
+@74 PRIMITIVE
+Line %05d: (E%03d) PRIMITIVE not implemented
+
+@75 PROCPARAM
+Line %05d: (E%03d) Procedural parameters not implemented
+
+@76 WITH
+Line %05d: (E%03d) Record type expected in WITH statement
+
+@77 ESTELLE
+Line %05d: (E%03d) Estelle construct illegal in procedure/function
+
+@78 GOTO
+Line %05d: (E%03d) GOTO illegal in current context
+
+@79 MODVAR
+Line %05d: (E%03d) Illegal module variable reference
+
+@80 NOIDENT
+Line %05d: (E%03d) Identifier expected
+
+@81 NOINTEGER
+Line %05d: (E%03d) Integer expected
+
+@82 BADLOOP
+Line %05d: (E%03d) TO or DOWNTO expected
+
+@83 BADFACTOR
+Line %05d: (E%03d) Bad factor in expression
+
+@84 BADCONSTANT
+Line %05d: (E%03d) Bad constant
+
+@85 BADFORMLPARM
+Line %05d: (E%03d) Bad formal parameter syntax
+
+@86 BADCLAUSE
+Line %05d: (E%03d) Clause or BEGIN expected
+
+@87 SYNTAX
+Line %05d: (E%03d) Syntax error
+
+@88 BADROLES
+Line %05d: (E%03d) Incompatible roles in CONNECT or ATTACH
+
+@89 CODEFULL
+Out of code space
+
+@90 ECUSEAGE
+Usage: ec [-I] [-S] <sourcefile base name>
+
+@91 NOSOURCE
+Cannot open source file
+
+@92 NOTARGET
+Cannot open target file
+
+@93 NOSEMICOLON
+Line %05d: (E%03d) Syntax error: ';' expected
+
+@94 NOCOLON
+Line %05d: (E%03d) Syntax error: ':' expected
+
+@95 NORIGHTPAR
+Line %05d: (E%03d) Syntax error: ')' expected
+
+@96 NOLEFTPAR
+Line %05d: (E%03d) Syntax error: '(' expected
+
+@97 NOCOMMA
+Line %05d: (E%03d) Syntax error: comma expected
+
+@98 NOEND
+Line %05d: (E%03d) Syntax error: END expected
+
+@99 NODO
+Line %05d: (E%03d) Syntax error: DO expected
+
+@100 NOLEFTBRAK
+Line %05d: (E%03d) Syntax error: '[' expected
+
+@101 NOPERIOD
+Line %05d: (E%03d) Syntax error: '.' expected
+
+@102 NORIGHTBRAK
+Line %05d: (E%03d) Syntax error: ']' expected
+
+@103 NOOF
+Line %05d: (E%03d) Syntax error: OF expected
+
+@104 NOLOGOPEN
+Cannot open log file
+
+@105 IPEMPTY
+Attempt to dequeue nonexistent interaction
+
+@106 NOCONNECT
+Attempt to output interaction to unconnected IP
+
+@107 BIGSOURCE
+Too many lines in source program
+
+@108 ILLEGALOP
+Attempt to execute illegal instruction (%d) at code offset %d
+
+@109 STACKOVR
+Stack overflow
+
+@110 OUTRANGE
+Index or value %d out of range %d..%d
+
+@111 BADCONNECT
+Attempt to connect an already connected interaction point
+
+@112 BADATTACH
+Attempt to attach a bound interaction point
+
+@113 2MANYWHEN
+Too many failed WHEN clauses in process
+
+@114 BADEXPORT
+Invalid type for exported variable
+
+@115 NOTEXPORTED
+Expected an exported variable reference
+
+@116 EXIST
+Expected module type or ordinal type in EXIST, FORONE or ALL
+
+@117 MODEXIST
+Only a single module variable allowed in EXIST, FORONE or ALL
+
+@118 MIXEXIST
+Illegal mixture of module and ordinal types in EXIST, FORONE or ALL
+
+@119 DOMAINSIZE
+Too many identifiers in domain list in EXIST, ALL or FORONE
+
+@120 POINTEROP
+Illegal operation for pointer types
+
+@121 NEWFAIL
+NEW failed to allocate heap memory
+
+@122 BADDISPOSE
+Attempt to DISPOSE illegal memory block
+
+@123 FAILEXPAND
+Attempt to expand process stack failed
+
+@124 BADINITTRANS
+Illegal clause type in initialisation transition
+
+@125 CASEVALUE
+Expression value in CASE statement has no corresponding label
+
+@126 BADBRKPT
+No breakpoint corresponding to this number
+
+@127 FIREENTRIES
+Maximum number (%d) of unique named transitions exceeded
+
+@128 WRONGROLE
+Line %05d: (E%03d) Internal Error -- Role of IP is not a channel role.
+
+@129 CLAUSENEST
+Line %05d: (E%03d) Bad nesting of clauses
+
+@130 ZERODIV
+Division by zero
+
+@131 BADSTEP
+Step size value may not be zero
+
+@132 INTRALLOCFAIL
+Failed to allocate interaction
+
+@133 INITFAIL
+Failed to allocate a module entry
+
+@134 METATRANS
+Failed to allocate a transition sequence table
+
+@135 MODSTACK
+Failed to allocate a module stack
+
+@136 MODVARTBL
+Failed to allocate a module variable table
+
+@137 IPTBL
+Failed to allocate an IP table
+
+@138 COMMONQ
+Failed to allocate a common queue
+
+@139 QUEUE
+Failed to allocate a reception queue
+
+@140 TRANSTBL
+Failed to allocate a transition table
+
+@141 ECMEMFAIL
+Line %05d: (E%03d) Failed to allocate symbol table memory block
+
+@142 ECCODFAIL
+Line %05d: (E%03d) Failed to allocate compiler code buffer
+
+@143 MAXTRANS
+Line %05d: (E%03d) Too many transitions in process
+
+@144 PRIORITY
+Line %05d: (E%03d) Interaction in OUTPUT may not have a priority
+
+@145 PROPDELAY
+Line %05d: (E%03d) OUTPUT interaction cannot have a propogation delay
+
+@149 ENDERRS
+Dummy entry - indicates start of warnings
+
+@150 UNREACHABLE
+State `%s' is unreachable
+
+@151 DEADLOCK
+State `%s' is a deadlock state
+
+@152 WHENOUT
+Interaction %s has no associated OUTPUT statement
+
+@153 OUTWHEN
+Interaction %s has no associated WHEN clause
+
+@154 UNREFINTR
+Interaction %s is not referenced
+
+
+
